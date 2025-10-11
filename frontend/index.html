@@ -48,32 +48,48 @@
         <section id="booking" class="booking-section">
             <h2>Book a Session or Studio</h2>
             <p>Reserve a photographer or our state-of-the-art studio.</p>
-            <form class="booking-form">
+
+            <div class="booking-controls">
+                <label for="booking-date">Select Date:</label>
+                <input type="date" id="booking-date" required>
+                <label for="booking-duration">Duration (minutes):</label>
+                <input type="number" id="booking-duration" value="60" min="30" step="30" required>
+                <button id="check-availability-btn">Check Availability</button>
+            </div>
+
+            <div id="available-slots" class="available-slots-grid">
+                <!-- Available slots will be loaded here by JavaScript -->
+                <p id="no-slots-message" style="display: none;">No slots available for the selected date and duration.</p>
+            </div>
+
+            <form id="booking-form" class="booking-form" style="display: none;">
+                <h3>Confirm Your Booking</h3>
+                <p>Selected Slot: <span id="selected-slot-display"></span></p>
+
                 <label for="service-type">Service Type:</label>
-                <select id="service-type" name="service-type">
+                <select id="service-type" name="service-type" required>
                     <option value="photographer">Photographer</option>
                     <option value="studio">Studio</option>
                 </select>
 
-                <label for="date">Date:</label>
-                <input type="date" id="date" name="date" required>
+                <label for="client-name">Your Name:</label>
+                <input type="text" id="client-name" name="client-name" required>
 
-                <label for="time">Time:</label>
-                <input type="time" id="time" name="time" required>
+                <label for="client-email">Your Email:</label>
+                <input type="email" id="client-email" name="client-email" required>
 
-                <label for="duration">Duration (hours):</label>
-                <input type="number" id="duration" name="duration" min="1" value="1" required>
-
-                <button type="submit" id="book-with-stripe">Check Availability & Book (Stripe)</button>
-                <button type="button" id="book-with-swish">Book with Swish</button>
+                <button type="submit" id="confirm-booking-btn">Confirm Booking</button>
             </form>
 
-            <div id="swish-payment-details" style="display:none; margin-top: 20px;">
-                <h3>Swish Payment Details</h3>
-                <label for="swish-number">Your Swish Number:</label>
-                <input type="text" id="swish-number" placeholder="e.g., 07123456789" required>
-                <p id="swish-payment-message"></p>
-                <button id="confirm-swish-booking">Confirm Swish Booking</button>
+            <div id="booking-confirmation" style="display: none; margin-top: 20px;">
+                <h3>Booking Confirmed!</h3>
+                <p>Your session has been successfully booked.</p>
+                <p>A confirmation email will be sent to you shortly.</p>
+            </div>
+
+            <div id="booking-error" style="display: none; margin-top: 20px; color: red;">
+                <h3>Booking Failed!</h3>
+                <p id="booking-error-message"></p>
             </div>
         </section>
 

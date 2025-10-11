@@ -1,14 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     const photoGrid = document.querySelector('.photo-grid');
     const categoryButtons = document.querySelectorAll('.category-btn');
-    const bookingForm = document.querySelector('.booking-form');
     const contactForm = document.querySelector('.contact-form');
+
+    // Booking elements
+    const bookingDateInput = document.getElementById('booking-date');
+    const bookingDurationInput = document.getElementById('booking-duration');
+    const checkAvailabilityBtn = document.getElementById('check-availability-btn');
+    const availableSlotsContainer = document.getElementById('available-slots');
+    const noSlotsMessage = document.getElementById('no-slots-message');
+    const bookingForm = document.getElementById('booking-form');
+    const selectedSlotDisplay = document.getElementById('selected-slot-display');
+    const serviceTypeInput = document.getElementById('service-type');
+    const clientNameInput = document.getElementById('client-name');
+    const clientEmailInput = document.getElementById('client-email');
+    const confirmBookingBtn = document.getElementById('confirm-booking-btn');
+    const bookingConfirmation = document.getElementById('booking-confirmation');
+    const bookingError = document.getElementById('booking-error');
+    const bookingErrorMessage = document.getElementById('booking-error-message');
+
+    let selectedSlot = null; // To store the currently selected slot for booking
 
     // Initialize Stripe.js with your publishable key
     // Replace 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY' with your actual publishable key
     const stripe = Stripe('pk_test_TYu3ASJC9A1s3y0000000000'); // Placeholder for a test publishable key
 
-    const API_URL = 'YOUR_DEPLOYED_BACKEND_URL/api'; // Placeholder: Replace with your actual deployed backend URL
+    // IMPORTANT: Replace with your actual deployed backend URL
+    const API_URL = 'http://localhost:3000/api';
 
     async function fetchPhotos() {
         try {
@@ -104,57 +122,117 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Function to fetch and display available slots
+    async function fetchAndDisplayAvailableSlots() {
+        const selectedDate = bookingDateInput.value;
+        const durationMinutes = bookingDurationInput.value;
+
+        if (!selectedDate || !durationMinutes) {
+            alert('Please select a date and duration.');
+            return;
+        }
+
+        availableSlotsContainer.innerHTML = ''; // Clear previous slots
+        noSlotsMessage.style.display = 'none';
+        bookingForm.style.display = 'none';
+        bookingConfirmation.style.display = 'none';
+        bookingError.style.display = 'none';
+
+        try {
+            const response = await fetch(`${API_URL}/calendar/available-slots?startDate=${selectedDate}T00:00:00Z&endDate=${selectedDate}T23:59:59Z&durationMinutes=${durationMinutes}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const slots = await response.json();
+
+            if (slots.length === 0) {
+                noSlotsMessage.style.display = 'block';
+                return;
+            }
+
+            slots.forEach(slot => {
+                const slotButton = document.createElement('button');
+                slotButton.classList.add('slot-button');
+                const startTime = new Date(slot.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const endTime = new Date(slot.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                slotButton.textContent = `${startTime} - ${endTime}`;
+                slotButton.dataset.start = slot.start;
+                slotButton.dataset.end = slot.end;
+
+                slotButton.addEventListener('click', () => {
+                    // Remove active class from previously selected slot
+                    document.querySelectorAll('.slot-button').forEach(btn => btn.classList.remove('active'));
+                    slotButton.classList.add('active');
+                    selectedSlot = slot;
+                    selectedSlotDisplay.textContent = `${startTime} - ${endTime} on ${new Date(slot.start).toLocaleDateString()}`;
+                    bookingForm.style.display = 'block';
+                });
+                availableSlotsContainer.appendChild(slotButton);
+            });
+        } catch (error) {
+            console.error('Error fetching available slots:', error);
+            alert('Failed to fetch available slots. Please try again.');
+        }
+    }
+
+    // Event listener for checking availability
+    checkAvailabilityBtn.addEventListener('click', fetchAndDisplayAvailableSlots);
+
     // Booking Form Submission
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const serviceType = document.getElementById('service-type').value;
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-        const duration = parseInt(document.getElementById('duration').value);
-
-        if (isNaN(duration) || duration <= 0) {
-            alert('Please enter a valid duration in hours.');
+        if (!selectedSlot) {
+            alert('Please select an available slot first.');
             return;
         }
 
+        const serviceType = serviceTypeInput.value;
+        const clientName = clientNameInput.value;
+        const clientEmail = clientEmailInput.value;
+        const durationHours = parseInt(bookingDurationInput.value) / 60; // Convert minutes to hours
+
+        const bookingDetails = {
+            serviceType,
+            date: new Date(selectedSlot.start).toISOString().split('T')[0],
+            time: new Date(selectedSlot.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+            duration: durationHours,
+            clientName,
+            clientEmail
+        };
+
         try {
-            // First, create a booking record in your database (optional, but good for tracking)
-            const bookingResponse = await fetch(`${API_URL}/bookings`, {
+            const response = await fetch(`${API_URL}/bookings/google-calendar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ serviceType, date, time, duration }),
+                body: JSON.stringify(bookingDetails),
             });
 
-            const bookingResult = await bookingResponse.json();
+            const result = await response.json();
 
-            if (!bookingResponse.ok) {
-                alert(`Booking failed: ${bookingResult.error}`);
+            if (!response.ok) {
+                bookingError.style.display = 'block';
+                bookingErrorMessage.textContent = result.error || 'An unknown error occurred.';
+                console.error('Booking failed:', result.error);
                 return;
             }
 
-            // Then, create a Stripe checkout session for the booking
-            const checkoutSessionResponse = await fetch(`${API_URL}/create-booking-checkout-session`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ serviceType, date, time, duration }),
-            });
+            bookingForm.style.display = 'none';
+            availableSlotsContainer.innerHTML = '';
+            noSlotsMessage.style.display = 'none';
+            bookingConfirmation.style.display = 'block';
+            bookingError.style.display = 'none';
 
-            const session = await checkoutSessionResponse.json();
-
-            if (session.error) {
-                alert(session.error);
-            } else {
-                stripe.redirectToCheckout({ sessionId: session.id });
-            }
+            // Optionally, clear the form
+            bookingForm.reset();
+            selectedSlot = null;
 
         } catch (error) {
-            console.error('Error submitting booking or creating checkout session:', error);
-            alert('An error occurred during booking. Please try again.');
+            console.error('Error submitting booking:', error);
+            bookingError.style.display = 'block';
+            bookingErrorMessage.textContent = 'An error occurred during booking. Please try again.';
         }
     });
 

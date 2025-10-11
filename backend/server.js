@@ -5,6 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs');
 const https = require('https');
+const { google } = require('googleapis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,7 +44,8 @@ const db = new sqlite3.Database('./stureby.db', (err) => {
                 date TEXT,
                 time TEXT,
                 duration INTEGER,
-                status TEXT DEFAULT 'pending'
+                status TEXT DEFAULT 'pending',
+                googleCalendarEventId TEXT
             )`, (err) => {
                 if (err) {
                     console.error("Error creating bookings table:", err.message);
@@ -263,6 +265,192 @@ app.post('/api/create-booking-checkout-session', async (req, res) => {
         });
         res.json({ id: session.id });
     } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Google Calendar API setup
+const oAuth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+);
+
+// If using a service account, load the key file
+if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH) {
+    const key = require(process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH);
+    oAuth2Client.fromJSON(key);
+    oAuth2Client.scopes = ['https://www.googleapis.com/auth/calendar'];
+} else {
+    // For OAuth2 flow, you would need to handle token acquisition and refresh
+    // For simplicity, this example assumes a pre-authorized token or service account
+    // In a real application, you'd implement a flow to get and store refresh tokens
+    console.warn("Google Service Account Key Path not provided. Ensure OAuth2 tokens are managed.");
+}
+
+const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+// Helper function to get busy times from Google Calendar
+async function getBusyTimes(calendarId, timeMin, timeMax) {
+    try {
+        const response = await calendar.freebusy.query({
+            auth: oAuth2Client,
+            resource: {
+                items: [{ id: calendarId }],
+                timeMin: timeMin.toISOString(),
+                timeMax: timeMax.toISOString(),
+            },
+        });
+        return response.data.calendars[calendarId].busy;
+    } catch (error) {
+        console.error('Error fetching busy times from Google Calendar:', error.message);
+        throw new Error('Failed to fetch available slots.');
+    }
+}
+
+// New endpoint to get available booking slots
+app.get('/api/calendar/available-slots', async (req, res) => {
+    const { startDate, endDate, durationMinutes } = req.query;
+    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+
+    if (!startDate || !endDate || !durationMinutes || !calendarId) {
+        return res.status(400).json({ error: "startDate, endDate, durationMinutes, and GOOGLE_CALENDAR_ID are required." });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const durationMs = parseInt(durationMinutes) * 60 * 1000; // duration in milliseconds
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || isNaN(durationMs)) {
+        return res.status(400).json({ error: "Invalid date or duration format." });
+    }
+
+    try {
+        const busyTimes = await getBusyTimes(calendarId, start, end);
+        const availableSlots = [];
+
+        // Define working hours (e.g., 9 AM to 5 PM) and buffer
+        const workingHoursStart = 9; // 9 AM
+        const workingHoursEnd = 17; // 5 PM
+        const bufferMinutes = 15; // 15 minutes buffer between appointments
+
+        let currentTime = new Date(start);
+        currentTime.setHours(workingHoursStart, 0, 0, 0); // Start checking from working hours
+
+        while (currentTime.getTime() + durationMs <= end.getTime()) {
+            const slotEnd = new Date(currentTime.getTime() + durationMs);
+
+            // Check if slot is within working hours
+            if (currentTime.getHours() >= workingHoursStart && slotEnd.getHours() <= workingHoursEnd) {
+                let isBusy = false;
+                for (const busy of busyTimes) {
+                    const busyStart = new Date(busy.start);
+                    const busyEnd = new Date(busy.end);
+
+                    // Check for overlap with busy times, including buffer
+                    if (
+                        (currentTime.getTime() < busyEnd.getTime() + (bufferMinutes * 60 * 1000)) &&
+                        (slotEnd.getTime() > busyStart.getTime() - (bufferMinutes * 60 * 1000))
+                    ) {
+                        isBusy = true;
+                        break;
+                    }
+                }
+
+                if (!isBusy) {
+                    availableSlots.push({
+                        start: currentTime.toISOString(),
+                        end: slotEnd.toISOString(),
+                    });
+                }
+            }
+
+            // Move to the next potential slot, considering duration and buffer
+            currentTime = new Date(currentTime.getTime() + (durationMinutes * 60 * 1000) + (bufferMinutes * 60 * 1000));
+            // If moving to next day, reset to working hours start
+            if (currentTime.getHours() > workingHoursEnd) {
+                currentTime.setDate(currentTime.getDate() + 1);
+                currentTime.setHours(workingHoursStart, 0, 0, 0);
+            }
+        }
+
+        res.json(availableSlots);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// New endpoint to create a booking in Google Calendar
+app.post('/api/bookings/google-calendar', async (req, res) => {
+    const { serviceType, date, time, duration, clientName, clientEmail } = req.body;
+    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+
+    if (!serviceType || !date || !time || !duration || !clientName || !clientEmail || !calendarId) {
+        return res.status(400).json({ error: "All booking fields and GOOGLE_CALENDAR_ID are required." });
+    }
+
+    const startDateTime = new Date(`${date}T${time}:00`);
+    const endDateTime = new Date(startDateTime.getTime() + (duration * 60 * 60 * 1000)); // duration in hours
+
+    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+        return res.status(400).json({ error: "Invalid date or time format." });
+    }
+
+    const event = {
+        summary: `${serviceType} with ${clientName}`,
+        description: `Client Email: ${clientEmail}\nService: ${serviceType}\nDuration: ${duration} hours`,
+        start: {
+            dateTime: startDateTime.toISOString(),
+            timeZone: 'UTC', // Or dynamically get from client/server
+        },
+        end: {
+            dateTime: endDateTime.toISOString(),
+            timeZone: 'UTC', // Or dynamically get from client/server
+        },
+        attendees: [
+            { email: clientEmail },
+            // Add your own calendar email if you want to be an attendee
+            // { email: 'your-calendar-email@example.com' },
+        ],
+        reminders: {
+            useDefault: false,
+            overrides: [
+                { method: 'email', minutes: 24 * 60 },
+                { method: 'popup', minutes: 10 },
+            ],
+        },
+    };
+
+    try {
+        const response = await calendar.events.insert({
+            auth: oAuth2Client,
+            calendarId: calendarId,
+            resource: event,
+        });
+
+        const googleCalendarEventId = response.data.id;
+
+        // Store booking in local database
+        const insert = 'INSERT INTO bookings (serviceType, date, time, duration, googleCalendarEventId) VALUES (?,?,?,?,?)';
+        db.run(insert, [serviceType, date, time, duration, googleCalendarEventId], function(err) {
+            if (err) {
+                console.error("Error inserting booking into local DB:", err.message);
+                // Consider rolling back Google Calendar event if DB insert fails
+                return res.status(500).json({ error: "Booking created in Google Calendar, but failed to save locally." });
+            }
+            res.status(201).json({
+                message: 'Booking created successfully',
+                bookingId: this.lastID,
+                googleCalendarEventId: googleCalendarEventId,
+                serviceType,
+                date,
+                time,
+                duration
+            });
+        });
+
+    } catch (e) {
+        console.error('Error creating Google Calendar event:', e.message);
         res.status(500).json({ error: e.message });
     }
 });
