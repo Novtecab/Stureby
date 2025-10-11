@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stureby Photography</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Stureby Photography</h1>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#booking">Booking</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <h2>Capture Your Moments</h2>
+            <p>Professional photography services and stunning prints.</p>
+            <button>Explore Gallery</button>
+        </section>
+
+        <section id="gallery" class="gallery-section">
+            <h2>Our Work</h2>
+            <div class="categories">
+                <button class="category-btn active" data-category="all">All</button>
+                <button class="category-btn" data-category="nature">Nature</button>
+                <button class="category-btn" data-category="people">People</button>
+                <button class="category-btn" data-category="travel">Travel</button>
+                <button class="category-btn" data-category="still-life">Still Life</button>
+                <button class="category-btn" data-category="city">City</button>
+                <button class="category-btn" data-category="abstract">Abstract</button>
+                <button class="category-btn" data-category="vintage">Vintage</button>
+                <button class="category-btn" data-category="architecture">Architecture</button>
+            </div>
+            <div class="photo-grid">
+                <!-- Photos will be loaded here by JavaScript -->
+            </div>
+        </section>
+
+        <section id="booking" class="booking-section">
+            <h2>Book a Session or Studio</h2>
+            <p>Reserve a photographer or our state-of-the-art studio.</p>
+            <form class="booking-form">
+                <label for="service-type">Service Type:</label>
+                <select id="service-type" name="service-type">
+                    <option value="photographer">Photographer</option>
+                    <option value="studio">Studio</option>
+                </select>
+
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label for="time">Time:</label>
+                <input type="time" id="time" name="time" required>
+
+                <label for="duration">Duration (hours):</label>
+                <input type="number" id="duration" name="duration" min="1" value="1" required>
+
+                <button type="submit" id="book-with-stripe">Check Availability & Book (Stripe)</button>
+                <button type="button" id="book-with-swish">Book with Swish</button>
+            </form>
+
+            <div id="swish-payment-details" style="display:none; margin-top: 20px;">
+                <h3>Swish Payment Details</h3>
+                <label for="swish-number">Your Swish Number:</label>
+                <input type="text" id="swish-number" placeholder="e.g., 07123456789" required>
+                <p id="swish-payment-message"></p>
+                <button id="confirm-swish-booking">Confirm Swish Booking</button>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <h2>Get in Touch</h2>
+            <p>Have questions? We'd love to hear from you.</p>
+            <form class="contact-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="5" required></textarea>
+
+                <button type="submit">Send Message</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Stureby Photography. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
