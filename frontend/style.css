@@ -511,6 +511,74 @@ body {
     font-size: 1rem;
 }
 
+/* Investment Packages Section */
+.investment-packages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.package-item {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 30px;
+}
+
+.package-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.package-item h2 {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.package-item .price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 25px;
+}
+
+.package-item ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.package-item ul li {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 30px;
+    color: #555;
+    font-size: 1.05rem;
+}
+
+.package-item ul li::before {
+    content: '★'; /* Star icon for list items */
+    color: var(--accent-color);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.package-item .button {
+    margin-top: 0;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
 /* Contact Section */
 .contact-section {
     background-color: #fff;
