@@ -95,6 +95,24 @@ const initialPhotos = [
     { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another portrait', category: 'portrait', title: 'Thoughtful Glance', price: 100.00 },
     { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another landscape', category: 'landscape', title: 'Golden Hour', price: 120.00 },
     { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another street photo', category: 'street', title: 'City Rhythms', price: 90.00 },
+    // New photos from Nelb Studios inspired categories
+    { src: 'https://via.placeholder.com/300x200/FF5733/FFFFFF?text=Product+Photography', alt: 'Product Photography', category: 'product', title: 'Elegant Product Shot', price: 75.00 },
+    { src: 'https://via.placeholder.com/300x200/33FF57/FFFFFF?text=Fashion+Photography', alt: 'Fashion Photography', category: 'fashion', title: 'High Fashion Look', price: 120.00 },
+    { src: 'https://via.placeholder.com/300x200/3357FF/FFFFFF?text=Food+Photography', alt: 'Food Photography', category: 'food', title: 'Gourmet Dish', price: 60.00 },
+    { src: 'https://via.placeholder.com/300x200/FF33F0/FFFFFF?text=Interior+Photography', alt: 'Interior Photography', category: 'interior', title: 'Modern Interior', price: 90.00 },
+    { src: 'https://via.placeholder.com/300x200/FF8C33/FFFFFF?text=Product+Showcase', alt: 'Product Showcase', category: 'product', title: 'Product Showcase', price: 80.00 },
+    { src: 'https://via.placeholder.com/300x200/33FF8C/FFFFFF?text=Fashion+Editorial', alt: 'Fashion Editorial', category: 'fashion', title: 'Fashion Editorial', price: 130.00 },
+    { src: 'https://via.placeholder.com/300x200/338CFF/FFFFFF?text=Food+Styling', alt: 'Food Styling', category: 'food', title: 'Gourmet Dish', price: 65.00 },
+    { src: 'https://via.placeholder.com/300x200/FF338C/FFFFFF?text=Architectural+Interior', alt: 'Architectural Interior', category: 'interior', title: 'Architectural Interior', price: 95.00 },
+    // New photos from Nelb Studios inspired categories
+    { src: 'https://via.placeholder.com/300x200/FF5733/FFFFFF?text=Product+Photography', alt: 'Product Photography', category: 'product', title: 'Elegant Product Shot', price: 75.00 },
+    { src: 'https://via.placeholder.com/300x200/33FF57/FFFFFF?text=Fashion+Photography', alt: 'Fashion Photography', category: 'fashion', title: 'High Fashion Look', price: 120.00 },
+    { src: 'https://via.placeholder.com/300x200/3357FF/FFFFFF?text=Food+Photography', alt: 'Food Photography', category: 'food', title: 'Gourmet Dish', price: 60.00 },
+    { src: 'https://via.placeholder.com/300x200/FF33F0/FFFFFF?text=Interior+Photography', alt: 'Interior Photography', category: 'interior', title: 'Modern Interior', price: 90.00 },
+    { src: 'https://via.placeholder.com/300x200/FF8C33/FFFFFF?text=Product+Showcase', alt: 'Product Showcase', category: 'product', title: 'Product Showcase', price: 80.00 },
+    { src: 'https://via.placeholder.com/300x200/33FF8C/FFFFFF?text=Fashion+Editorial', alt: 'Fashion Editorial', category: 'fashion', title: 'Fashion Editorial', price: 130.00 },
+    { src: 'https://via.placeholder.com/300x200/338CFF/FFFFFF?text=Food+Styling', alt: 'Food Styling', category: 'food', title: 'Gourmet Dish', price: 65.00 },
+    { src: 'https://via.placeholder.com/300x200/FF338C/FFFFFF?text=Architectural+Interior', alt: 'Architectural Interior', category: 'interior', title: 'Architectural Interior', price: 95.00 },
 ];
 
 // Get all photos from database

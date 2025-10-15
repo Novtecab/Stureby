@@ -198,13 +198,13 @@ body {
     border-color: var(--accent-color);
 }
 
-.photo-grid {
+.photo-grid, .shop-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
 }
 
-.photo-item {
+.photo-item, .shop-item {
     background-color: #fff;
     border-radius: 10px;
     overflow: hidden;
@@ -212,12 +212,12 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.photo-item:hover {
+.photo-item:hover, .shop-item:hover {
     transform: translateY(-8px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.photo-item img {
+.photo-item img, .shop-item img {
     width: 100%;
     height: 220px;
     object-fit: cover;
@@ -225,36 +225,36 @@ body {
     transition: transform 0.3s ease;
 }
 
-.photo-item:hover img {
+.photo-item:hover img, .shop-item:hover img {
     transform: scale(1.05);
 }
 
-.photo-item-info {
+.photo-item-info, .shop-item-info {
     padding: 20px;
     text-align: center;
 }
 
-.photo-item-info h3 {
+.photo-item-info h3, .shop-item-info h3 {
     margin-top: 0;
     font-size: 1.5rem;
     color: var(--primary-color);
     margin-bottom: 10px;
 }
 
-.photo-item-info p {
+.photo-item-info p, .shop-item-info p {
     color: #666;
     font-size: 0.95rem;
     margin-bottom: 10px;
 }
 
-.photo-item-info .price {
+.photo-item-info .price, .shop-item-info .price {
     font-size: 1.3rem;
     font-weight: bold;
     color: var(--accent-color);
     margin-bottom: 15px;
 }
 
-.photo-item-info button {
+.photo-item-info button, .shop-item-info button {
     background-color: #28a745; /* Green for purchase */
     color: #fff;
     border: none;
@@ -266,7 +266,7 @@ body {
     font-size: 1rem;
 }
 
-.photo-item-info button:hover {
+.photo-item-info button:hover, .shop-item-info button:hover {
     background-color: #218838;
 }
 
@@ -654,7 +654,7 @@ body {
         padding: 40px 20px;
     }
 
-    .photo-grid {
+    .photo-grid, .shop-grid {
         grid-template-columns: 1fr;
     }
 

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const photoGrid = document.querySelector('.photo-grid');
+    const shopGrid = document.querySelector('.shop-grid'); // New: Shop grid
     const categoryButtons = document.querySelectorAll('.category-btn');
     const contactForm = document.querySelector('.contact-form');
 
@@ -17,8 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingErrorMessage = document.getElementById('booking-error-message');
  
     // Initialize Stripe.js with your publishable key
-    // Replace 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY' with your actual publishable key
-    const stripe = Stripe('pk_test_TYu3ASJC9A1s3y0000000000'); // Placeholder for a test publishable key
+    const stripe = Stripe('pk_test_51SH8FcR7AJeGzqyq1maXW6cybHSzsjhHwSofvnFF7KbvOPyQGkSgry99g1WZjM234zzKBbnU0xAj0XumBwbjXQaf00XPFMeR9Y');
  
     // IMPORTANT: Replace with your actual deployed backend URL
     const API_URL = 'http://localhost:3000/api';
@@ -36,45 +36,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
  
-    async function displayPhotos(filterCategory = 'all') {
-        photoGrid.innerHTML = ''; // Clear current photos
-        const photos = await fetchPhotos(); // Fetch photos from the backend
+    async function displayItems(container, items, isShop = false) {
+        container.innerHTML = ''; // Clear current items
  
-        const filteredPhotos = filterCategory === 'all'
-            ? photos
-            : photos.filter(photo => photo.category.toLowerCase() === filterCategory.toLowerCase());
- 
-        if (filteredPhotos.length === 0) {
-            photoGrid.innerHTML = '<p>No photos found for this category.</p>';
+        if (items.length === 0) {
+            container.innerHTML = `<p>No ${isShop ? 'shop items' : 'photos'} found for this category.</p>`;
             return;
         }
  
-        filteredPhotos.forEach(photo => {
-            const photoItem = document.createElement('div');
-            photoItem.classList.add('photo-item');
-            photoItem.innerHTML = `
-                <img src="${photo.src}" alt="${photo.alt}">
-                <div class="photo-item-info">
-                    <h3>${photo.title}</h3>
-                    <p>Category: ${photo.category}</p>
-                    <p class="price">$${photo.price.toFixed(2)}</p>
-                    <button data-id="${photo.id}">Add to Cart</button>
+        items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.classList.add(isShop ? 'shop-item' : 'photo-item');
+            itemElement.innerHTML = `
+                <img src="${item.src}" alt="${item.alt}">
+                <div class="${isShop ? 'shop-item-info' : 'photo-item-info'}">
+                    <h3>${item.title}</h3>
+                    <p>Category: ${item.category}</p>
+                    <p class="price">$${item.price.toFixed(2)}</p>
+                    ${isShop ? `<button class="buy-now-btn" data-id="${item.id}">Buy Now</button>` : `<button data-id="${item.id}">Add to Cart</button>`}
                 </div>
             `;
-            photoGrid.appendChild(photoItem);
+            container.appendChild(itemElement);
         });
  
-        // Add event listeners for "Add to Cart" buttons
-        document.querySelectorAll('.photo-item-info button').forEach(button => {
+        // Add event listeners for "Add to Cart" or "Buy Now" buttons
+        container.querySelectorAll('button').forEach(button => {
             button.addEventListener('click', async (e) => {
-                const photoId = e.target.dataset.id;
+                const itemId = e.target.dataset.id;
                 try {
                     const response = await fetch(`${API_URL}/create-checkout-session`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ photoId }),
+                        body: JSON.stringify({ photoId: itemId }), // Use photoId as backend expects
                     });
                     const session = await response.json();
                     if (session.error) {
@@ -89,9 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    async function displayGalleryPhotos(filterCategory = 'all') {
+        const photos = await fetchPhotos();
+        const filteredPhotos = filterCategory === 'all'
+            ? photos
+            : photos.filter(photo => photo.category.toLowerCase() === filterCategory.toLowerCase());
+        displayItems(photoGrid, filteredPhotos, false);
+    }
+
+    async function displayShopItems() {
+        const photos = await fetchPhotos(); // Fetch all photos for the shop
+        displayItems(shopGrid, photos, true);
+    }
  
-    // Initial display of all photos
-    displayPhotos();
+    // Initial display of all photos in gallery and shop items
+    displayGalleryPhotos();
+    displayShopItems();
  
     // Check for Stripe redirect success/cancel
     const urlParams = new URLSearchParams(window.location.search);
@@ -107,13 +116,13 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Booking payment canceled. Your reservation was not completed.');
     }
  
-    // Category filtering
+    // Category filtering for gallery
     categoryButtons.forEach(button => {
         button.addEventListener('click', () => {
             categoryButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             const category = button.dataset.category;
-            displayPhotos(category);
+            displayGalleryPhotos(category);
         });
     });
  
