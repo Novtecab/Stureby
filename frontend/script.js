@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Stripe.js with your publishable key
     const stripe = Stripe('pk_test_51SH8FcR7AJeGzqyq1maXW6cybHSzsjhHwSofvnFF7KbvOPyQGkSgry99g1WZjM234zzKBbnU0xAj0XumBwbjXQaf00XPFMeR9Y');
  
-    // IMPORTANT: Replace with your actual deployed backend URL
-    const API_URL = 'http://localhost:3000/api';
+    // Dynamically determine the API URL based on the current host
+    // For Netlify, this will point to the Netlify Functions endpoint.
+    // For local development, ensure your backend runs on port 3000 or adjust accordingly.
+    const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:3000/api' : `${window.location.origin}/.netlify/functions/server/api`;
  
     async function fetchPhotos() {
         try {
@@ -256,11 +258,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // Smooth scrolling for navigation links
     document.querySelectorAll('.nav-link').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
- 
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
+            // Only prevent default and scroll if it's an internal anchor link
+            if (this.hash !== '') {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
     });
+
+    // Associate Application Form Submission
+    const associateApplicationForm = document.querySelector('.associate-application-form');
+    if (associateApplicationForm) {
+        associateApplicationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('applicant-name').value;
+            const email = document.getElementById('applicant-email').value;
+            const phone = document.getElementById('applicant-phone').value;
+            const portfolio = document.getElementById('applicant-portfolio').value;
+            const experience = document.getElementById('applicant-experience').value;
+            const gear = document.getElementById('applicant-gear').value;
+            const message = document.getElementById('applicant-message').value;
+
+            const applicationConfirmation = document.getElementById('application-confirmation');
+            const applicationError = document.getElementById('application-error');
+            const applicationErrorMessage = document.getElementById('application-error-message');
+
+            try {
+                const response = await fetch(`${API_URL}/apply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, phone, portfolio, experience, gear, message }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    applicationConfirmation.style.display = 'block';
+                    applicationError.style.display = 'none';
+                    associateApplicationForm.reset();
+                } else {
+                    applicationConfirmation.style.display = 'none';
+                    applicationError.style.display = 'block';
+                    applicationErrorMessage.textContent = result.error || 'An unknown error occurred during application submission.';
+                    console.error('Application submission failed:', result.error);
+                }
+            } catch (error) {
+                console.error('Error submitting application form:', error);
+                applicationConfirmation.style.display = 'none';
+                applicationError.style.display = 'block';
+                applicationErrorMessage.textContent = 'An error occurred while sending your application. Please try again.';
+            }
+        });
+    }
 });

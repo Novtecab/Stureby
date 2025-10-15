@@ -519,6 +519,47 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
+app.post('/api/apply', async (req, res) => {
+    const { name, email, phone, portfolio, experience, gear, message } = req.body;
+
+    if (!name || !email || !experience || !message) {
+        return res.status(400).json({ error: "Name, email, years of experience, and message are required." });
+    }
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_SECURE === 'true',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: 'novtec.x.ab@gmail.com', // Target email for applications
+        subject: `New Second Associate Application from ${name}`,
+        html: `
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
+            <p><strong>Portfolio/Website:</strong> ${portfolio || 'N/A'}</p>
+            <p><strong>Years of Experience:</strong> ${experience}</p>
+            <p><strong>Photography Gear:</strong> ${gear || 'N/A'}</p>
+            <p><strong>Message:</strong> ${message}</p>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Application submitted successfully!' });
+    } catch (error) {
+        console.error('Error sending application email:', error);
+        res.status(500).json({ error: 'Failed to send application email.' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
