@@ -6,10 +6,11 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs');
 const https = require('https');
 const { google } = require('googleapis');
-
+const nodemailer = require('nodemailer');
+ 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+ 
 app.use(cors());
 app.use(express.json());
 
@@ -87,6 +88,13 @@ const initialPhotos = [
     { src: 'https://picsum.photos/id/1050/300/200', alt: 'Abstract Art', category: 'abstract', title: 'Colorful Abstraction', price: 75.00 },
     { src: 'https://picsum.photos/id/1053/300/200', alt: 'Old Car', category: 'vintage', title: 'Classic Ride', price: 60.00 },
     { src: 'https://picsum.photos/id/1054/300/200', alt: 'Bridge', category: 'architecture', title: 'Architectural Marvel', price: 85.00 },
+    // New photos from Adnan's Instagram
+    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Portrait of a woman', category: 'portrait', title: 'Elegant Gaze', price: 95.00 },
+    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Landscape with mountains', category: 'landscape', title: 'Mountain Serenity', price: 110.00 },
+    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Street photography', category: 'street', title: 'Urban Life', price: 85.00 },
+    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another portrait', category: 'portrait', title: 'Thoughtful Glance', price: 100.00 },
+    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another landscape', category: 'landscape', title: 'Golden Hour', price: 120.00 },
+    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another street photo', category: 'street', title: 'City Rhythms', price: 90.00 },
 ];
 
 // Get all photos from database
@@ -452,6 +460,44 @@ app.post('/api/bookings/google-calendar', async (req, res) => {
     } catch (e) {
         console.error('Error creating Google Calendar event:', e.message);
         res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/contact', async (req, res) => {
+    const { name, email, message } = req.body;
+
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: "Name, email, and message are required." });
+    }
+
+    // Create a Nodemailer transporter using SMTP
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: 'novtec.x.ab@gmail.com', // The target email address
+        subject: `New Contact Form Submission from ${name}`,
+        html: `
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong> ${message}</p>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Email sent successfully!' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ error: 'Failed to send email.' });
     }
 });
 
