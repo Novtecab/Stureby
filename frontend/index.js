@@ -1,5 +1,6 @@
 import { API_URL, stripe } from './config.js';
-import { displayServices } from './services.js'; // Import displayServices
+import { displayServices } from './services.js';
+import { displayCourses } from './courses.js'; // Import displayCourses
 
 document.addEventListener('DOMContentLoaded', () => {
     const photoGrid = document.querySelector('.photo-grid');
@@ -96,6 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display services overview on homepage
     displayServices('.services-overview-section .services-grid', 3); // Display 3 services
+
+    // Display courses overview on homepage
+    displayCourses('.courses-overview-section .course-grid', 2); // Display 2 courses
 
     // Check for Stripe redirect success/cancel
     const urlParams = new URLSearchParams(window.location.search);

@@ -463,7 +463,7 @@ body {
 }
 
 #check-availability-btn:hover {
-    background-color: #e60000;
+    background-color: #e60000; /* Darker shade of accent-color (#a00) */
 }
 
 .available-slots-grid {
@@ -726,7 +726,7 @@ body {
 }
 
 .contact-form button:hover {
-    background-color: #e60000;
+    background-color: #e60000; /* Darker shade of accent-color (#a00) */
 }
 
 /* Associate Application Form */
@@ -780,7 +780,7 @@ body {
 }
 
 .associate-application-form button:hover {
-    background-color: #e60000;
+    background-color: #e60000; /* Darker shade of accent-color (#a00) */
 }
 
 /* Courses Section */
