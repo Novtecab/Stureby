@@ -33,7 +33,7 @@ export async function displayServices(containerSelector, limit = 0) {
         const serviceItem = document.createElement('div');
         serviceItem.classList.add('service-item');
         serviceItem.innerHTML = `
-            <img src="${service.image}" alt="${service.title}">
+            <img src="${service.image || `${API_URL}/assets/placeholder_image_default.jpg`}" alt="${service.title}">
             <h3>${service.title}</h3>
             <p>${service.description}</p>
             <ul>

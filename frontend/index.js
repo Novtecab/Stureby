@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemElement = document.createElement('div');
             itemElement.classList.add(isShop ? 'shop-item' : 'photo-item');
             itemElement.innerHTML = `
-                <img src="${item.src}" alt="${item.alt}">
+                <img src="${item.src || `${API_URL}/assets/placeholder_image_default.jpg`}" alt="${item.alt}">
                 <div class="${isShop ? 'shop-item-info' : 'photo-item-info'}">
                     <h3>${item.title}</h3>
                     <p>Category: ${item.category}</p>

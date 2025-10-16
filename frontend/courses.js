@@ -33,7 +33,7 @@ export async function displayCourses(containerSelector, limit = 0) {
         const courseItem = document.createElement('div');
         courseItem.classList.add('course-item');
         courseItem.innerHTML = `
-            <img src="${course.image}" alt="${course.title}">
+            <img src="${course.image || `${API_URL}/assets/placeholder_image_default.jpg`}" alt="${course.title}">
             <h3>${course.title}</h3>
             <p class="course-instructor">Instructor: ${course.instructor}</p>
             <p class="course-description">${course.description}</p>
