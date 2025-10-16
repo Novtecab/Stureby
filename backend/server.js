@@ -78,43 +78,52 @@ const db = new sqlite3.Database('./stureby.db', (err) => {
 });
 
 const initialPhotos = [
-    { src: 'https://picsum.photos/id/1015/300/200', alt: 'Forest Path', category: 'nature', title: 'Mystical Forest Path', price: 65.00 },
-    { src: 'https://picsum.photos/id/1018/300/200', alt: 'Mountain Landscape', category: 'nature', title: 'Majestic Mountain View', price: 80.00 },
-    { src: 'https://picsum.photos/id/1025/300/200', alt: 'Dog Portrait', category: 'people', title: 'Loyal Companion', price: 50.00 },
-    { src: 'https://picsum.photos/id/1039/300/200', alt: 'Desert Road', category: 'travel', title: 'Endless Desert Road', price: 70.00 },
-    { src: 'https://picsum.photos/id/1040/300/200', alt: 'Boat on Lake', category: 'nature', title: 'Serene Lake Morning', price: 55.00 },
-    { src: 'https://picsum.photos/id/1043/300/200', alt: 'Coffee Cup', category: 'still-life', title: 'Morning Brew', price: 45.00 },
-    { src: 'https://picsum.photos/id/1047/300/200', alt: 'Cityscape at Night', category: 'city', title: 'Urban Glow', price: 90.00 },
-    { src: 'https://picsum.photos/id/1050/300/200', alt: 'Abstract Art', category: 'abstract', title: 'Colorful Abstraction', price: 75.00 },
-    { src: 'https://picsum.photos/id/1053/300/200', alt: 'Old Car', category: 'vintage', title: 'Classic Ride', price: 60.00 },
-    { src: 'https://picsum.photos/id/1054/300/200', alt: 'Bridge', category: 'architecture', title: 'Architectural Marvel', price: 85.00 },
-    // New photos from Adnan's Instagram
-    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Portrait of a woman', category: 'portrait', title: 'Elegant Gaze', price: 95.00 },
-    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Landscape with mountains', category: 'landscape', title: 'Mountain Serenity', price: 110.00 },
-    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Street photography', category: 'street', title: 'Urban Life', price: 85.00 },
-    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another portrait', category: 'portrait', title: 'Thoughtful Glance', price: 100.00 },
-    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another landscape', category: 'landscape', title: 'Golden Hour', price: 120.00 },
-    { src: 'https://scontent-arn2-1.cdninstagram.com/v/t51.2885-15/369900000_1000000000000000_1000000000000000_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=18de74&_nc_ohc=0000000000000000&_nc_ht=scontent-arn2-1.cdninstagram.com&edm=AOQ1c0wEAAAA&oh=00000000000000000000000000000000&oe=67123456&_nc_vs=00000000000000000000000000000000', alt: 'Another street photo', category: 'street', title: 'City Rhythms', price: 90.00 },
-    // New photos from Nelb Studios inspired categories
-    { src: 'https://via.placeholder.com/300x200/FF5733/FFFFFF?text=Product+Photography', alt: 'Product Photography', category: 'product', title: 'Elegant Product Shot', price: 75.00 },
-    { src: 'https://via.placeholder.com/300x200/33FF57/FFFFFF?text=Fashion+Photography', alt: 'Fashion Photography', category: 'fashion', title: 'High Fashion Look', price: 120.00 },
-    { src: 'https://via.placeholder.com/300x200/3357FF/FFFFFF?text=Food+Photography', alt: 'Food Photography', category: 'food', title: 'Gourmet Dish', price: 60.00 },
-    { src: 'https://via.placeholder.com/300x200/FF33F0/FFFFFF?text=Interior+Photography', alt: 'Interior Photography', category: 'interior', title: 'Modern Interior', price: 90.00 },
-    { src: 'https://via.placeholder.com/300x200/FF8C33/FFFFFF?text=Product+Showcase', alt: 'Product Showcase', category: 'product', title: 'Product Showcase', price: 80.00 },
-    { src: 'https://via.placeholder.com/300x200/33FF8C/FFFFFF?text=Fashion+Editorial', alt: 'Fashion Editorial', category: 'fashion', title: 'Fashion Editorial', price: 130.00 },
-    { src: 'https://via.placeholder.com/300x200/338CFF/FFFFFF?text=Food+Styling', alt: 'Food Styling', category: 'food', title: 'Gourmet Dish', price: 65.00 },
-    { src: 'https://via.placeholder.com/300x200/FF338C/FFFFFF?text=Architectural+Interior', alt: 'Architectural Interior', category: 'interior', title: 'Architectural Interior', price: 95.00 },
-    // New photos from Nelb Studios inspired categories
-    { src: 'https://via.placeholder.com/300x200/FF5733/FFFFFF?text=Product+Photography', alt: 'Product Photography', category: 'product', title: 'Elegant Product Shot', price: 75.00 },
-    { src: 'https://via.placeholder.com/300x200/33FF57/FFFFFF?text=Fashion+Photography', alt: 'Fashion Photography', category: 'fashion', title: 'High Fashion Look', price: 120.00 },
-    { src: 'https://via.placeholder.com/300x200/3357FF/FFFFFF?text=Food+Photography', alt: 'Food Photography', category: 'food', title: 'Gourmet Dish', price: 60.00 },
-    { src: 'https://via.placeholder.com/300x200/FF33F0/FFFFFF?text=Interior+Photography', alt: 'Interior Photography', category: 'interior', title: 'Modern Interior', price: 90.00 },
-    { src: 'https://via.placeholder.com/300x200/FF8C33/FFFFFF?text=Product+Showcase', alt: 'Product Showcase', category: 'product', title: 'Product Showcase', price: 80.00 },
-    { src: 'https://via.placeholder.com/300x200/33FF8C/FFFFFF?text=Fashion+Editorial', alt: 'Fashion Editorial', category: 'fashion', title: 'Fashion Editorial', price: 130.00 },
-    { src: 'https://via.placeholder.com/300x200/338CFF/FFFFFF?text=Food+Styling', alt: 'Food Styling', category: 'food', title: 'Gourmet Dish', price: 65.00 },
-    { src: 'https://via.placeholder.com/300x200/FF338C/FFFFFF?text=Architectural+Interior', alt: 'Architectural Interior', category: 'interior', title: 'Architectural Interior', price: 95.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Forest Path', category: 'nature', title: 'Mystical Forest Path', price: 65.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Mountain Landscape', category: 'nature', title: 'Majestic Mountain View', price: 80.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Dog Portrait', category: 'people', title: 'Loyal Companion', price: 50.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Desert Road', category: 'travel', title: 'Endless Desert Road', price: 70.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Boat on Lake', category: 'nature', title: 'Serene Lake Morning', price: 55.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Coffee Cup', category: 'still-life', title: 'Morning Brew', price: 45.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Cityscape at Night', category: 'city', title: 'Urban Glow', price: 90.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Abstract Art', category: 'abstract', title: 'Colorful Abstraction', price: 75.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Old Car', category: 'vintage', title: 'Classic Ride', price: 60.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Bridge', category: 'architecture', title: 'Architectural Marvel', price: 85.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Portrait of a woman', category: 'portrait', title: 'Elegant Gaze', price: 95.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Landscape with mountains', category: 'landscape', title: 'Mountain Serenity', price: 110.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Street photography', category: 'street', title: 'Urban Life', price: 85.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Another portrait', category: 'portrait', title: 'Thoughtful Glance', price: 100.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Another landscape', category: 'landscape', title: 'Golden Hour', price: 120.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Another street photo', category: 'street', title: 'City Rhythms', price: 90.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Product Photography', category: 'product', title: 'Elegant Product Shot', price: 75.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Fashion Photography', category: 'fashion', title: 'High Fashion Look', price: 120.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Food Photography', category: 'food', title: 'Gourmet Dish', price: 60.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Interior Photography', category: 'interior', title: 'Modern Interior', price: 90.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Product Showcase', category: 'product', title: 'Product Showcase', price: 80.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Fashion Editorial', category: 'fashion', title: 'Fashion Editorial', price: 130.00 },
+    { src: '/assets/placeholder_image1.jpg', alt: 'Food Styling', category: 'food', title: 'Gourmet Dish', price: 65.00 },
+    { src: '/assets/placeholder_image2.jpg', alt: 'Architectural Interior', category: 'interior', title: 'Architectural Interior', price: 95.00 },
 ];
-
+ 
+const initialServices = [
+    { id: 1, image: '/assets/placeholder_image1.jpg', title: 'Product Photography', description: 'Showcase your products with stunning, high-quality images that convert.', details: ['E-commerce product shots', 'Lifestyle product photography', '360-degree product views', 'Retouching and editing'] },
+    { id: 2, image: '/assets/placeholder_image2.jpg', title: 'Fashion Photography', description: 'Captivating fashion editorials and lookbooks that define your brand\'s aesthetic.', details: ['Editorial shoots', 'Lookbook creation', 'Campaign photography', 'Model sourcing and styling'] },
+    { id: 3, image: '/assets/placeholder_image1.jpg', title: 'Food Photography', description: 'Deliciously styled food photography that makes mouths water and brands shine.', details: ['Restaurant menu photography', 'Cookbook and editorial food shots', 'Food styling and prop sourcing', 'Recipe development support'] },
+    { id: 4, image: '/assets/placeholder_image2.jpg', title: 'Interior Photography', description: 'Highlighting the beauty and functionality of spaces with expert interior photography.', details: ['Real estate photography', 'Architectural photography', 'Hotel and hospitality visuals', 'Post-production and enhancement'] },
+];
+ 
+const initialInvestments = [
+    { id: 1, title: 'Basic Package', price: 200.00, details: ['1 hour session', '10 edited digital images', 'Online gallery'] },
+    { id: 2, title: 'Standard Package', price: 400.00, details: ['2 hour session', '25 edited digital images', 'Online gallery', '5 prints (5x7)'] },
+    { id: 3, title: 'Premium Package', price: 700.00, details: ['3 hour session', '50 edited digital images', 'Online gallery', '10 prints (8x10)', 'Custom photo album'] },
+];
+ 
+const initialCourses = [
+    { id: 1, image: '/assets/placeholder_image1.jpg', title: 'Mastering Studio Lighting', instructor: 'Jane Doe', description: 'Learn the fundamentals and advanced techniques of studio lighting for stunning portraits.', price: 199.00 },
+    { id: 2, image: '/assets/placeholder_image2.jpg', title: 'Advanced Portrait Retouching', instructor: 'John Smith', description: 'Take your portrait editing skills to the next level with advanced retouching workflows.', price: 249.00 },
+    { id: 3, image: '/assets/placeholder_image1.jpg', title: 'Landscape Photography Essentials', instructor: 'Emily White', description: 'Discover the secrets to capturing breathtaking landscapes from composition to post-processing.', price: 149.00 },
+    { id: 4, image: '/assets/placeholder_image2.jpg', title: 'Street Photography: Telling Stories', instructor: 'David Green', description: 'Master the art of candid street photography and tell compelling visual stories.', price: 179.00 },
+];
+ 
 // Get all photos from database
 app.get('/api/photos', (req, res) => {
     db.all("SELECT * FROM photos", [], (err, rows) => {
@@ -125,11 +134,26 @@ app.get('/api/photos', (req, res) => {
         res.json(rows);
     });
 });
-
+ 
+// Get all services
+app.get('/api/services', (req, res) => {
+    res.json(initialServices);
+});
+ 
+// Get all investments
+app.get('/api/investments', (req, res) => {
+    res.json(initialInvestments);
+});
+ 
+// Get all courses
+app.get('/api/courses', (req, res) => {
+    res.json(initialCourses);
+});
+ 
 // Create Stripe Checkout Session for product purchase
 app.post('/api/create-checkout-session', async (req, res) => {
     const { photoId } = req.body;
-
+ 
     db.get("SELECT * FROM photos WHERE id = ?", [photoId], async (err, photo) => {
         if (err) {
             res.status(400).json({ error: err.message });
@@ -139,7 +163,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
             res.status(404).json({ error: "Photo not found" });
             return;
         }
-
+ 
         try {
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
@@ -149,7 +173,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
                             currency: 'usd',
                             product_data: {
                                 name: photo.title,
-                                images: [photo.src],
+                                images: [`${req.protocol}://${req.get('host')}${photo.src}`], // Use absolute URL for Stripe
                             },
                             unit_amount: Math.round(photo.price * 100), // Price in cents
                         },

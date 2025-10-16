@@ -10,29 +10,84 @@
 <body>
     <div class="wrapper">
         <header class="header">
-            <a href="#" class="logo">Stureby Design Studio</a>
+            <a href="index.html" class="logo">Stureby Design Studio</a>
             <nav class="nav">
                 <ul class="nav-list">
                     <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-                    <li class="nav-item"><a href="services.html" class="nav-link">Services & Investments</a></li>
+                    <li class="nav-item"><a href="services.html" class="nav-link">Services</a></li>
                     <li class="nav-item"><a href="courses.html" class="nav-link">Courses</a></li>
                     <li class="nav-item"><a href="shop.html" class="nav-link">Shop</a></li>
-                    <li class="nav-item"><a href="#application-form" class="nav-link">Apply Here</a></li>
                 </ul>
             </nav>
+            <div class="header-actions">
+                <a href="#booking" class="button header-button">Book a Session</a>
+                <a href="#application-form" class="button header-button secondary">Apply</a>
+            </div>
         </header>
  
         <main class="main-content">
             <section id="home" class="hero-section">
+                <video autoplay muted loop id="hero-video">
+                    <source src="assets/placeholder_video1.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
                 <div class="hero-content">
-                    <h2 class="hero-title">Unlock Your Creative Potential</h2>
-                    <p class="hero-subtitle">Master photography with our expert-led courses and workshops.</p>
-                    <a href="courses.html" class="button hero-button">Explore Courses</a>
+                    <h2 class="hero-title">Capture Your Vision</h2>
+                    <p class="hero-subtitle">Expert photography services, inspiring courses, and stunning prints.</p>
+                    <div class="hero-buttons">
+                        <a href="services.html" class="button hero-button">Our Services</a>
+                        <a href="courses.html" class="button hero-button secondary">Learn More</a>
+                    </div>
                 </div>
             </section>
- 
+
+            <section id="about" class="content-section about-section">
+                <div class="about-content">
+                    <h2 class="section-title">About Stureby Design Studio</h2>
+                    <p class="about-description">
+                        Stureby Design Studio is a collective of passionate photographers and educators dedicated to capturing life's moments and empowering aspiring artists. We offer a range of services from professional photoshoots to comprehensive photography courses, all designed to help you see the world through a new lens.
+                    </p>
+                    <p class="about-description">
+                        Our mission is to blend artistic vision with technical excellence, providing clients with timeless images and students with the skills to create their own masterpieces.
+                    </p>
+                    <a href="services.html" class="button">Discover More</a>
+                </div>
+                <div class="about-image">
+                    <img src="assets/placeholder_image1.jpg" alt="About Us">
+                </div>
+            </section>
+
+            <section id="services-overview" class="content-section services-overview-section">
+                <h2 class="section-title">Our Photography Services</h2>
+                <p class="section-subtitle">From portraits to events, we capture your most precious moments.</p>
+                <div class="services-grid">
+                    <div class="service-item">
+                        <img src="assets/placeholder_image2.jpg" alt="Portrait Photography">
+                        <h3>Portrait Photography</h3>
+                        <p>Capturing your unique personality and style in stunning portraits.</p>
+                        <a href="services.html#portraits" class="button">View Details</a>
+                    </div>
+                    <div class="service-item">
+                        <img src="https://via.placeholder.com/400x250/555/fff?text=Event+Photography" alt="Event Photography">
+                        <h3>Event Photography</h3>
+                        <p>Documenting your special events with a keen eye for detail and emotion.</p>
+                        <a href="services.html#events" class="button">View Details</a>
+                    </div>
+                    <div class="service-item">
+                        <img src="https://via.placeholder.com/400x250/777/fff?text=Product+Photography" alt="Product Photography">
+                        <h3>Product Photography</h3>
+                        <p>Showcasing your products with high-quality images that attract customers.</p>
+                        <a href="services.html#products" class="button">View Details</a>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 50px;">
+                    <a href="services.html" class="button">View All Services</a>
+                </div>
+            </section>
+
             <section id="gallery" class="gallery-section content-section">
-                <h2 class="section-title">Our Work</h2>
+                <h2 class="section-title">Our Gallery</h2>
+                <p class="section-subtitle">A showcase of our diverse photographic work.</p>
                 <div class="categories">
                     <button class="category-btn active" data-category="all">All</button>
                     <button class="category-btn" data-category="nature">Nature</button>
@@ -55,91 +110,89 @@
                     <!-- Photos will be loaded here by JavaScript -->
                 </div>
             </section>
- 
-            <section id="booking" class="booking-section">
-                <h2>Book a Session or Studio</h2>
-                <p>Reserve a photographer or our state-of-the-art studio.</p>
- 
-                <div class="booking-controls">
-                    <label for="booking-date">Select Date:</label>
-                    <input type="date" id="booking-date" required>
-                    <label for="booking-duration">Duration (minutes):</label>
-                    <input type="number" id="booking-duration" value="60" min="30" step="30" required>
-                    <label for="service-type">Service Type:</label>
-                    <select id="service-type" name="service-type" required>
-                        <option value="photographer">Photographer</option>
-                        <option value="studio">Studio</option>
-                    </select>
-                    <label for="client-name">Your Name:</label>
-                    <input type="text" id="client-name" name="client-name" required>
-                    <label for="client-email">Your Email:</label>
-                    <input type="email" id="client-email" name="client-email" required>
-                    <button id="check-availability-btn">Check Availability</button>
+
+            <section id="courses-overview" class="content-section courses-overview-section">
+                <h2 class="section-title">Photography Courses</h2>
+                <p class="section-subtitle">Elevate your skills with our comprehensive courses.</p>
+                <div class="course-grid">
+                    <div class="course-item">
+                        <img src="https://via.placeholder.com/400x250/888/fff?text=Beginner+Course" alt="Beginner Photography Course">
+                        <h3>Beginner's Guide to DSLR</h3>
+                        <p class="course-instructor">Instructor: Jane Doe</p>
+                        <p class="course-description">Learn the fundamentals of photography and master your DSLR camera.</p>
+                        <p class="course-price">$199</p>
+                        <a href="courses.html#beginner" class="button course-button">Enroll Now</a>
+                    </div>
+                    <div class="course-item">
+                        <img src="https://via.placeholder.com/400x250/666/fff?text=Advanced+Course" alt="Advanced Photography Course">
+                        <h3>Advanced Composition</h3>
+                        <p class="course-instructor">Instructor: John Smith</p>
+                        <p class="course-description">Dive deep into advanced compositional techniques and artistic vision.</p>
+                        <p class="course-price">$299</p>
+                        <a href="courses.html#advanced" class="button course-button">Enroll Now</a>
+                    </div>
                 </div>
- 
-                <div id="available-slots" class="available-slots-grid">
-                    <!-- Available slots will be loaded here by JavaScript -->
-                    <p id="no-slots-message" style="display: none;">No slots available for the selected date and duration.</p>
-                </div>
- 
-                <div id="booking-confirmation" style="display: none; margin-top: 20px;">
-                    <h3>Booking Confirmed!</h3>
-                    <p>Your session has been successfully booked.</p>
-                    <p>A confirmation email will be sent to you shortly.</p>
-                </div>
- 
-                <div id="booking-error" style="display: none; margin-top: 20px; color: red;">
-                    <h3>Booking Failed!</h3>
-                    <p id="booking-error-message"></p>
+                <div class="text-center" style="margin-top: 50px;">
+                    <a href="courses.html" class="button">View All Courses</a>
                 </div>
             </section>
- 
-            <section id="contact" class="contact-section">
-                <h2>Get in Touch</h2>
-                <p>Have questions? We'd love to hear from you.</p>
-                <form class="contact-form">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
- 
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
- 
-                    <label for="message">Message:</label>
-                    <textarea id="message" name="message" rows="5" required></textarea>
- 
-                    <button type="submit">Send Message</button>
-                </form>
+
+            <section id="booking" class="booking-section content-section">
+                <h2 class="section-title">Book a Session or Studio</h2>
+                <p class="section-subtitle">Reserve a photographer or our state-of-the-art studio.</p>
+                <div class="booking-form-container">
+                    <div class="booking-controls">
+                        <label for="booking-date">Select Date:</label>
+                        <input type="date" id="booking-date" required>
+                        <label for="booking-duration">Duration (minutes):</label>
+                        <input type="number" id="booking-duration" value="60" min="30" step="30" required>
+                        <label for="service-type">Service Type:</label>
+                        <select id="service-type" name="service-type" required>
+                            <option value="photographer">Photographer</option>
+                            <option value="studio">Studio</option>
+                        </select>
+                        <label for="client-name">Your Name:</label>
+                        <input type="text" id="client-name" name="client-name" required>
+                        <label for="client-email">Your Email:</label>
+                        <input type="email" id="client-email" name="client-email" required>
+                        <button id="check-availability-btn" class="button">Check Availability</button>
+                    </div>
+                    <div id="available-slots" class="available-slots-grid">
+                        <!-- Available slots will be loaded here by JavaScript -->
+                        <p id="no-slots-message" style="display: none;">No slots available for the selected date and duration.</p>
+                    </div>
+                    <div id="booking-confirmation" style="display: none; margin-top: 20px;">
+                        <h3>Booking Confirmed!</h3>
+                        <p>Your session has been successfully booked.</p>
+                        <p>A confirmation email will be sent to you shortly.</p>
+                    </div>
+                    <div id="booking-error" style="display: none; margin-top: 20px; color: red;">
+                        <h3>Booking Failed!</h3>
+                        <p id="booking-error-message"></p>
+                    </div>
+                </div>
             </section>
 
             <section id="application-form" class="content-section">
-                <h1 class="section-title">Second Associate Application</h1>
-                <p class="section-subtitle">Thank you for your interest in joining our team! Please fill out the form below.</p>
- 
+                <h2 class="section-title">Join Our Team</h2>
+                <p class="section-subtitle">Passionate about photography? Apply to become a Stureby associate.</p>
                 <form class="associate-application-form">
                     <label for="applicant-name">Full Name:</label>
                     <input type="text" id="applicant-name" name="applicant-name" required>
- 
                     <label for="applicant-email">Email:</label>
                     <input type="email" id="applicant-email" name="applicant-email" required>
- 
                     <label for="applicant-phone">Phone Number:</label>
                     <input type="tel" id="applicant-phone" name="applicant-phone">
- 
                     <label for="applicant-portfolio">Portfolio/Website Link:</label>
                     <input type="url" id="applicant-portfolio" name="applicant-portfolio">
- 
                     <label for="applicant-experience">Years of Photography Experience:</label>
                     <input type="number" id="applicant-experience" name="applicant-experience" min="0" required>
- 
                     <label for="applicant-gear">List of Photography Gear:</label>
                     <textarea id="applicant-gear" name="applicant-gear" rows="5"></textarea>
- 
                     <label for="applicant-message">Tell us why you'd be a great fit:</label>
                     <textarea id="applicant-message" name="applicant-message" rows="7" required></textarea>
- 
                     <button type="submit" class="button">Submit Application</button>
                 </form>
- 
                 <div id="application-confirmation" style="display: none; margin-top: 20px; text-align: center; color: green;">
                     <h3>Application Submitted!</h3>
                     <p>Thank you for your application. We will review it and get back to you shortly.</p>
@@ -148,6 +201,20 @@
                     <h3>Application Failed!</h3>
                     <p id="application-error-message"></p>
                 </div>
+            </section>
+
+            <section id="contact" class="contact-section content-section">
+                <h2 class="section-title">Get in Touch</h2>
+                <p class="section-subtitle">Have questions? We'd love to hear from you.</p>
+                <form class="contact-form">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                    <button type="submit" class="button">Send Message</button>
+                </form>
             </section>
         </main>
  

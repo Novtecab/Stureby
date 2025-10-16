@@ -1,10 +1,11 @@
 import { API_URL, stripe } from './config.js';
- 
+import { displayServices } from './services.js'; // Import displayServices
+
 document.addEventListener('DOMContentLoaded', () => {
     const photoGrid = document.querySelector('.photo-grid');
     const categoryButtons = document.querySelectorAll('.category-btn');
     const contactForm = document.querySelector('.contact-form');
- 
+
     // Booking elements
     const bookingDateInput = document.getElementById('booking-date');
     const bookingDurationInput = document.getElementById('booking-duration');
@@ -17,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingConfirmation = document.getElementById('booking-confirmation');
     const bookingError = document.getElementById('booking-error');
     const bookingErrorMessage = document.getElementById('booking-error-message');
- 
+
     async function fetchPhotos() {
         try {
             const response = await fetch(`${API_URL}/photos`);
@@ -30,15 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return [];
         }
     }
- 
+
     async function displayItems(container, items, isShop = false) {
         container.innerHTML = ''; // Clear current items
- 
+
         if (items.length === 0) {
             container.innerHTML = `<p>No ${isShop ? 'shop items' : 'photos'} found for this category.</p>`;
             return;
         }
- 
+
         items.forEach(item => {
             const itemElement = document.createElement('div');
             itemElement.classList.add(isShop ? 'shop-item' : 'photo-item');
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             container.appendChild(itemElement);
         });
- 
+
         // Add event listeners for "Add to Cart" or "Buy Now" buttons
         container.querySelectorAll('button').forEach(button => {
             button.addEventListener('click', async (e) => {
@@ -79,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
- 
+
     async function displayGalleryPhotos(filterCategory = 'all') {
         const photos = await fetchPhotos();
         const filteredPhotos = filterCategory === 'all'
@@ -87,12 +88,15 @@ document.addEventListener('DOMContentLoaded', () => {
             : photos.filter(photo => photo.category.toLowerCase() === filterCategory.toLowerCase());
         displayItems(photoGrid, filteredPhotos, false);
     }
- 
+
     // Initial display of all photos in gallery and shop items
     if (photoGrid) {
         displayGalleryPhotos();
     }
- 
+
+    // Display services overview on homepage
+    displayServices('.services-overview-section .services-grid', 3); // Display 3 services
+
     // Check for Stripe redirect success/cancel
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success')) {
@@ -106,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (urlParams.get('bookingCanceled')) {
         alert('Booking payment canceled. Your reservation was not completed.');
     }
- 
+
     // Category filtering for gallery
     if (categoryButtons.length > 0) {
         categoryButtons.forEach(button => {
@@ -118,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
- 
+
     // Function to fetch and display available slots
     async function fetchAndDisplayAvailableSlots() {
         const selectedDate = bookingDateInput.value;
@@ -126,29 +130,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const serviceType = serviceTypeInput.value;
         const clientName = clientNameInput.value;
         const clientEmail = clientEmailInput.value;
- 
+
         if (!selectedDate || !durationMinutes || !serviceType || !clientName || !clientEmail) {
             alert('Please fill in all booking details: Date, Duration, Service Type, Your Name, and Your Email.');
             return;
         }
- 
+
         availableSlotsContainer.innerHTML = ''; // Clear previous slots
         noSlotsMessage.style.display = 'none';
         bookingConfirmation.style.display = 'none';
         bookingError.style.display = 'none';
- 
+
         try {
             const response = await fetch(`${API_URL}/calendar/available-slots?startDate=${selectedDate}T00:00:00Z&endDate=${selectedDate}T23:59:59Z&durationMinutes=${durationMinutes}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const slots = await response.json();
- 
+
             if (slots.length === 0) {
                 noSlotsMessage.style.display = 'block';
                 return;
             }
- 
+
             slots.forEach(slot => {
                 const slotButton = document.createElement('button');
                 slotButton.classList.add('slot-button');
@@ -157,14 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 slotButton.textContent = `${startTime} - ${endTime}`;
                 slotButton.dataset.start = slot.start;
                 slotButton.dataset.end = slot.end;
- 
+
                 slotButton.addEventListener('click', async () => {
                     // Direct booking when a slot is clicked
                     document.querySelectorAll('.slot-button').forEach(btn => btn.classList.remove('active'));
                     slotButton.classList.add('active');
- 
+
                     const durationHours = parseInt(durationMinutes) / 60; // Convert minutes to hours
- 
+
                     const bookingDetails = {
                         serviceType,
                         date: new Date(slot.start).toISOString().split('T')[0],
@@ -173,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         clientName,
                         clientEmail
                     };
- 
+
                     try {
                         const bookingResponse = await fetch(`${API_URL}/bookings/google-calendar`, {
                             method: 'POST',
@@ -182,9 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             },
                             body: JSON.stringify(bookingDetails),
                         });
- 
+
                         const bookingResult = await bookingResponse.json();
- 
+
                         if (bookingResponse.ok) {
                             availableSlotsContainer.innerHTML = '';
                             noSlotsMessage.style.display = 'none';
@@ -211,18 +215,18 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Failed to fetch available slots. Please try again.');
         }
     }
- 
+
     // Event listener for checking availability
     checkAvailabilityBtn.addEventListener('click', fetchAndDisplayAvailableSlots);
- 
+
     // Contact Form Submission
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
- 
+
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
- 
+
         try {
             const response = await fetch(`${API_URL}/contact`, {
                 method: 'POST',
@@ -231,9 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({ name, email, message }),
             });
- 
+
             const result = await response.json();
- 
+
             if (response.ok) {
                 alert('Message sent successfully! We will get back to you shortly.');
                 contactForm.reset();
@@ -245,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('An error occurred while sending your message. Please try again.');
         }
     });
- 
+
     // Smooth scrolling for navigation links
     document.querySelectorAll('.nav-link').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -258,13 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
- 
+
     // Associate Application Form Submission
     const associateApplicationForm = document.querySelector('.associate-application-form');
     if (associateApplicationForm) {
         associateApplicationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
- 
+
             const name = document.getElementById('applicant-name').value;
             const email = document.getElementById('applicant-email').value;
             const phone = document.getElementById('applicant-phone').value;
@@ -272,11 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const experience = document.getElementById('applicant-experience').value;
             const gear = document.getElementById('applicant-gear').value;
             const message = document.getElementById('applicant-message').value;
- 
+
             const applicationConfirmation = document.getElementById('application-confirmation');
             const applicationError = document.getElementById('application-error');
             const applicationErrorMessage = document.getElementById('application-error-message');
- 
+
             try {
                 const response = await fetch(`${API_URL}/apply`, {
                     method: 'POST',
@@ -285,9 +289,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     body: JSON.stringify({ name, email, phone, portfolio, experience, gear, message }),
                 });
- 
+
                 const result = await response.json();
- 
+
                 if (response.ok) {
                     applicationConfirmation.style.display = 'block';
                     applicationError.style.display = 'none';
