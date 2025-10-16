@@ -2,14 +2,17 @@
   "name": "frontend",
   "version": "1.0.0",
   "description": "Stureby Photography Frontend",
-  "main": "index.html",
+  "source": "index.html",
   "scripts": {
-    "start": "http-server -c-1"
+    "start": "parcel index.html",
+    "build": "parcel build index.html services.html courses.html shop.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "parcel": "^2.16.0"
   }
 }
