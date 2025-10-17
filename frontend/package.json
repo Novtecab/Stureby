@@ -4,7 +4,7 @@
   "description": "Stureby Photography Frontend",
   "source": "index.html",
   "scripts": {
-    "build": "mkdir -p dist && cp -r ./* dist/",
+    "build": "mkdir -p dist && rsync -av --exclude 'dist' --exclude 'node_modules' --exclude '.parcel-cache' ./* dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
