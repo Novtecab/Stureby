@@ -19,7 +19,7 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import api from '../services/api';
 import { initiateCheckout } from '../utils/stripeCheckout';
-import { Magazine } from '../types';
+import type { Magazine } from '../types';
 
 export default defineComponent({
   name: 'Magazine',

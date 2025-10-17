@@ -39,7 +39,7 @@ import { defineComponent, ref, onMounted } from 'vue';
 import api from '../services/api';
 import { initiateCheckout } from '../utils/stripeCheckout';
 
-import { Photo } from '../types';
+import type { Photo } from '../types';
 
 export default defineComponent({
   name: 'Home',

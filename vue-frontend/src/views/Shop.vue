@@ -30,7 +30,7 @@ import { defineComponent, ref, onMounted, computed } from 'vue';
 import api from '../services/api';
 import { initiateCheckout } from '../utils/stripeCheckout';
 
-import { Photo } from '../types';
+import type { Photo } from '../types';
 
 export default defineComponent({
   name: 'Shop',
