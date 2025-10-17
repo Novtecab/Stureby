@@ -1,7 +1,7 @@
 import { getStripe } from '../plugins/stripe';
 import api from '../services/api';
 
-export const initiateCheckout = async (items: Array<{ id: string; quantity: number; type: string }>) => {
+export const initiateCheckout = async (items: Array<{ id: string; quantity: number; type: string; price?: number }>) => {
   try {
     const response = await api.post('/create-checkout-session', { items });
     const session = response.data;

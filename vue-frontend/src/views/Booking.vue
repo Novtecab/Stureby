@@ -65,7 +65,7 @@
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import api from '../services/api';
 import { initiateCheckout } from '../utils/stripeCheckout';
-import { Service, BookingSlot } from '../types';
+import { type Service, type BookingSlot } from '../types';
 
 export default defineComponent({
   name: 'Booking',
