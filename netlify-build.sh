@@ -9,7 +9,7 @@ echo "Starting Netlify build script..."
 echo "Installing frontend dependencies..."
 cd frontend
 npm install
-echo "Building frontend with Parcel..."
+echo "Copying frontend files to dist..."
 npm run build
 cd ..
  
