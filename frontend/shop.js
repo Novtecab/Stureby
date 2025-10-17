@@ -1,4 +1,4 @@
-import { API_URL, stripe } from './config.js';
+import { API_URL, getStripeInstance } from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const shopGrid = document.querySelector('.shop-grid');
@@ -55,7 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (session.error) {
                         alert(session.error);
                     } else {
-                        stripe.redirectToCheckout({ sessionId: session.id });
+                        const stripe = getStripeInstance();
+                        if (stripe) {
+                            stripe.redirectToCheckout({ sessionId: session.id });
+                        } else {
+                            console.error('Stripe.js is not loaded.');
+                            alert('Stripe is not available. Please try again later.');
+                        }
                     }
                 } catch (error) {
                     console.error('Error creating checkout session:', error);

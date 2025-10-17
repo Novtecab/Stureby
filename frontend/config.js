@@ -4,4 +4,9 @@
 export const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:3000/api' : `${window.location.origin}/.netlify/functions/server/api`;
 
 // Initialize Stripe.js with your publishable key
-export const stripe = Stripe('pk_test_51SH8FcR7AJeGzqyq1maXW6cybHSzsjhHwSofvnFF7KbvOPyQGkSgry99g1WZjM234zzKBbnU0xAj0XumBwbjXQaf00XPFMeR9Y');
+export function getStripeInstance() {
+    if (typeof window !== 'undefined' && window.Stripe) {
+        return window.Stripe('pk_test_51SH8FcR7AJeGzqyq1maXW6cybHSzsjhHwSofvnFF7KbvOPyQGkSgry99g1WZjM234zzKBbnU0xAj0XumBwbjXQaf00XPFMeR9Y');
+    }
+    return null;
+}
