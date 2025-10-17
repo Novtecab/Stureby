@@ -1,6 +1,6 @@
 [build]
-  publish = "frontend/dist"
-  command = "./netlify-build.sh"
+  publish = "vue-frontend/dist"
+  command = "cd vue-frontend && npm install && npm run build"
 
 [functions]
   directory = "backend"

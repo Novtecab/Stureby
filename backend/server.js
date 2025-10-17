@@ -1,589 +1,281 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const fs = require('fs');
-const https = require('https');
-const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
- 
+const { google } = require('googleapis');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
- 
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-
-app.get('/', (req, res) => {
-    res.send('Stureby Photography Backend API');
-});
-
-// Initialize SQLite database
-const db = new sqlite3.Database('./stureby.db', (err) => {
-    if (err) {
-        console.error('Error opening database:', err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-        db.run(`CREATE TABLE IF NOT EXISTS photos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            src TEXT,
-            alt TEXT,
-            category TEXT,
-            title TEXT,
-            price REAL
-        )`, (err) => {
-            if (err) {
-                console.error("Error creating photos table:", err.message);
-                return;
-            }
-            console.log('Photos table ensured.');
-
-            db.run(`CREATE TABLE IF NOT EXISTS bookings (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                serviceType TEXT,
-                date TEXT,
-                time TEXT,
-                duration INTEGER,
-                status TEXT DEFAULT 'pending',
-                googleCalendarEventId TEXT
-            )`, (err) => {
-                if (err) {
-                    console.error("Error creating bookings table:", err.message);
-                    return;
-                }
-                console.log('Bookings table ensured.');
-
-                // Insert sample photos if the table is empty
-                db.get("SELECT COUNT(*) AS count FROM photos", (err, row) => {
-                    if (err) {
-                        console.error("Error checking photos table:", err.message);
-                        return;
-                    }
-                    if (row.count === 0) {
-                        const insert = 'INSERT INTO photos (src, alt, category, title, price) VALUES (?,?,?,?,?)';
-                        initialPhotos.forEach(photo => {
-                            db.run(insert, [photo.src, photo.alt, photo.category, photo.title, photo.price], function(err) {
-                                if (err) {
-                                    console.error("Error inserting sample photo:", err.message);
-                                }
-                            });
-                        });
-                        console.log('Sample photos inserted.');
-                    }
-                });
-            });
-        });
-    }
-});
-
-const initialPhotos = [
-    { src: '/assets/placeholder_image1.jpg', alt: 'Forest Path', category: 'nature', title: 'Mystical Forest Path', price: 65.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Mountain Landscape', category: 'nature', title: 'Majestic Mountain View', price: 80.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Dog Portrait', category: 'people', title: 'Loyal Companion', price: 50.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Desert Road', category: 'travel', title: 'Endless Desert Road', price: 70.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Boat on Lake', category: 'nature', title: 'Serene Lake Morning', price: 55.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Coffee Cup', category: 'still-life', title: 'Morning Brew', price: 45.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Cityscape at Night', category: 'city', title: 'Urban Glow', price: 90.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Abstract Art', category: 'abstract', title: 'Colorful Abstraction', price: 75.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Old Car', category: 'vintage', title: 'Classic Ride', price: 60.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Bridge', category: 'architecture', title: 'Architectural Marvel', price: 85.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Portrait of a woman', category: 'portrait', title: 'Elegant Gaze', price: 95.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Landscape with mountains', category: 'landscape', title: 'Mountain Serenity', price: 110.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Street photography', category: 'street', title: 'Urban Life', price: 85.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Another portrait', category: 'portrait', title: 'Thoughtful Glance', price: 100.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Another landscape', category: 'landscape', title: 'Golden Hour', price: 120.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Another street photo', category: 'street', title: 'City Rhythms', price: 90.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Product Photography', category: 'product', title: 'Elegant Product Shot', price: 75.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Fashion Photography', category: 'fashion', title: 'High Fashion Look', price: 120.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Food Photography', category: 'food', title: 'Gourmet Dish', price: 60.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Interior Photography', category: 'interior', title: 'Modern Interior', price: 90.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Product Showcase', category: 'product', title: 'Product Showcase', price: 80.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Fashion Editorial', category: 'fashion', title: 'Fashion Editorial', price: 130.00 },
-    { src: '/assets/placeholder_image1.jpg', alt: 'Food Styling', category: 'food', title: 'Gourmet Dish', price: 65.00 },
-    { src: '/assets/placeholder_image2.jpg', alt: 'Architectural Interior', category: 'interior', title: 'Architectural Interior', price: 95.00 },
+// Dummy data for demonstration
+const photos = [
+    { id: 'photo1', src: '/assets/placeholder_image1.png', alt: 'Landscape Photo 1', title: 'Mountain View', category: 'landscape', price: 25.00 },
+    { id: 'photo2', src: '/assets/placeholder_image2.png', alt: 'Portrait Photo 1', title: 'Smiling Face', category: 'portrait', price: 35.00 },
+    { id: 'photo3', src: '/assets/placeholder_image1.png', alt: 'Wildlife Photo 1', title: 'Eagle in Flight', category: 'wildlife', price: 45.00 },
 ];
- 
-const initialServices = [
-    { id: 1, image: '/assets/placeholder_image1.jpg', title: 'Product Photography', description: 'Showcase your products with stunning, high-quality images that convert.', details: ['E-commerce product shots', 'Lifestyle product photography', '360-degree product views', 'Retouching and editing'] },
-    { id: 2, image: '/assets/placeholder_image2.jpg', title: 'Fashion Photography', description: 'Captivating fashion editorials and lookbooks that define your brand\'s aesthetic.', details: ['Editorial shoots', 'Lookbook creation', 'Campaign photography', 'Model sourcing and styling'] },
-    { id: 3, image: '/assets/placeholder_image1.jpg', title: 'Food Photography', description: 'Deliciously styled food photography that makes mouths water and brands shine.', details: ['Restaurant menu photography', 'Cookbook and editorial food shots', 'Food styling and prop sourcing', 'Recipe development support'] },
-    { id: 4, image: '/assets/placeholder_image2.jpg', title: 'Interior Photography', description: 'Highlighting the beauty and functionality of spaces with expert interior photography.', details: ['Real estate photography', 'Architectural photography', 'Hotel and hospitality visuals', 'Post-production and enhancement'] },
+
+const magazine = {
+    id: 'magazine1',
+    title: 'Photography Monthly - October Issue',
+    description: 'A deep dive into astrophotography and urban landscapes.',
+    coverImage: '/assets/placeholder_image1.png',
+    price: 15.00,
+    releaseDate: '2023-10-26',
+};
+
+const services = [
+    { id: 'service1', title: 'Corporate Photography', description: 'Professional headshots and team photos.', image: '/assets/placeholder_image1.png', details: ['On-site shoot', 'Digital delivery', 'Retouching'], price: 200.00 },
+    { id: 'service2', title: 'Product Photography', description: 'High-quality images for your e-commerce store.', image: '/assets/placeholder_image2.png', details: ['Studio shoot', 'White background', 'High-res files'], price: 150.00 },
+    { id: 'service3', title: 'Fashion Photography', description: 'Stunning visuals for your lookbook or campaign.', image: '/assets/placeholder_image1.png', details: ['Location shoot', 'Model direction', 'Post-production'], price: 300.00 },
 ];
- 
-const initialInvestments = [
-    { id: 1, title: 'Basic Package', price: 200.00, details: ['1 hour session', '10 edited digital images', 'Online gallery'] },
-    { id: 2, title: 'Standard Package', price: 400.00, details: ['2 hour session', '25 edited digital images', 'Online gallery', '5 prints (5x7)'] },
-    { id: 3, title: 'Premium Package', price: 700.00, details: ['3 hour session', '50 edited digital images', 'Online gallery', '10 prints (8x10)', 'Custom photo album'] },
-];
- 
-const initialCourses = [
-    { id: 1, image: '/assets/placeholder_image1.jpg', title: 'Mastering Studio Lighting', instructor: 'Jane Doe', description: 'Learn the fundamentals and advanced techniques of studio lighting for stunning portraits.', price: 199.00 },
-    { id: 2, image: '/assets/placeholder_image2.jpg', title: 'Advanced Portrait Retouching', instructor: 'John Smith', description: 'Take your portrait editing skills to the next level with advanced retouching workflows.', price: 249.00 },
-    { id: 3, image: '/assets/placeholder_image1.jpg', title: 'Landscape Photography Essentials', instructor: 'Emily White', description: 'Discover the secrets to capturing breathtaking landscapes from composition to post-processing.', price: 149.00 },
-    { id: 4, image: '/assets/placeholder_image2.jpg', title: 'Street Photography: Telling Stories', instructor: 'David Green', description: 'Master the art of candid street photography and tell compelling visual stories.', price: 179.00 },
-];
- 
-// Get all photos from database
+
+// API Endpoints
 app.get('/api/photos', (req, res) => {
-    db.all("SELECT * FROM photos", [], (err, rows) => {
-        if (err) {
-            res.status(400).json({"error": err.message});
-            return;
-        }
-        res.json(rows);
-    });
+    const limit = req.query.limit ? parseInt(req.query.limit) : photos.length;
+    res.json(photos.slice(0, limit));
 });
- 
-// Get all services
+
+app.get('/api/magazine', (req, res) => {
+    res.json(magazine);
+});
+
 app.get('/api/services', (req, res) => {
-    res.json(initialServices);
+    res.json(services);
 });
- 
-// Get all investments
-app.get('/api/investments', (req, res) => {
-    res.json(initialInvestments);
-});
- 
-// Get all courses
-app.get('/api/courses', (req, res) => {
-    res.json(initialCourses);
-});
- 
-// Create Stripe Checkout Session for product purchase
+
+// Stripe Checkout Session
 app.post('/api/create-checkout-session', async (req, res) => {
-    const { photoId } = req.body;
- 
-    db.get("SELECT * FROM photos WHERE id = ?", [photoId], async (err, photo) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
+    const { items } = req.body;
+
+    const line_items = items.map(item => {
+        let product;
+        if (item.type === 'photo') {
+            product = photos.find(p => p.id === item.id);
+        } else if (item.type === 'magazine') {
+            product = magazine.id === item.id ? magazine : null;
+        } else if (item.type === 'booking') {
+            product = services.find(s => s.id === item.id);
         }
-        if (!photo) {
-            res.status(404).json({ error: "Photo not found" });
-            return;
+
+        if (!product) {
+            throw new Error(`Product with ID ${item.id} not found.`);
         }
- 
-        try {
-            const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
-                line_items: [
-                    {
-                        price_data: {
-                            currency: 'usd',
-                            product_data: {
-                                name: photo.title,
-                                images: [`${req.protocol}://${req.get('host')}${photo.src}`], // Use absolute URL for Stripe
-                            },
-                            unit_amount: Math.round(photo.price * 100), // Price in cents
-                        },
-                        quantity: 1,
-                    },
-                ],
-                mode: 'payment',
-                success_url: `${req.protocol}://${req.get('host')}/frontend/index.html?success=true`,
-                cancel_url: `${req.protocol}://${req.get('host')}/frontend/index.html?canceled=true`,
-            });
-            res.json({ id: session.id });
-        } catch (e) {
-            res.status(500).json({ error: e.message });
-        }
+
+        return {
+            price_data: {
+                currency: 'usd',
+                product_data: {
+                    name: product.title,
+                },
+                unit_amount: product.price * 100, // Price in cents
+            },
+            quantity: item.quantity,
+        };
     });
-});
-
-// Swish Payment Request Endpoint
-app.post('/api/swish/payment-request', async (req, res) => {
-    const { amount, message, payerAlias } = req.body; // payerAlias is the Swish number of the customer
-
-    if (!amount || !message || !payerAlias) {
-        return res.status(400).json({ error: "Amount, message, and payerAlias are required for Swish payment." });
-    }
-
-    const paymentRequest = {
-        payeePaymentReference: "SturebyPhoto" + Date.now(),
-        callbackUrl: process.env.SWISH_CALLBACK_URL,
-        payerAlias: payerAlias,
-        payeeAlias: process.env.SWISH_MERCHANT_ID,
-        amount: amount.toString(),
-        currency: "SEK",
-        message: message
-    };
-
-    const options = {
-        hostname: new URL(process.env.SWISH_API_BASE_URL).hostname,
-        port: 443,
-        path: '/swish-cpcapi/api/v2/paymentrequests',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(JSON.stringify(paymentRequest))
-        },
-        cert: fs.readFileSync(process.env.SWISH_PAYMENT_REQUEST_CERTIFICATE_PATH),
-        key: fs.readFileSync(process.env.SWISH_PAYMENT_REQUEST_KEY_PATH),
-        passphrase: '' // If your key has a passphrase, provide it here
-    };
-
-    const swishReq = https.request(options, (swishRes) => {
-        let data = '';
-        swishRes.on('data', (chunk) => {
-            data += chunk;
-        });
-        swishRes.on('end', () => {
-            if (swishRes.statusCode === 201) {
-                const location = swishRes.headers.location;
-                const paymentRequestToken = location.split('/').pop();
-                res.status(201).json({
-                    message: 'Swish payment request initiated',
-                    paymentRequestToken: paymentRequestToken,
-                    paymentRequest: paymentRequest,
-                    location: location
-                });
-            } else {
-                res.status(swishRes.statusCode).json({ error: JSON.parse(data) });
-            }
-        });
-    });
-
-    swishReq.on('error', (e) => {
-        console.error(`Problem with Swish request: ${e.message}`);
-        res.status(500).json({ error: e.message });
-    });
-
-    swishReq.write(JSON.stringify(paymentRequest));
-    swishReq.end();
-});
-
-// Swish Callback Endpoint
-app.post('/api/swish/callback', (req, res) => {
-    console.log('Swish Callback Received:', req.body);
-    // Here you would update your database with the payment status
-    // and potentially notify the user.
-    res.status(200).json({ message: 'Callback received' });
-});
-
-// Create a new booking
-app.post('/api/bookings', (req, res) => {
-    const { serviceType, date, time, duration } = req.body;
-
-    if (!serviceType || !date || !time || !duration) {
-        return res.status(400).json({ error: "All fields are required for booking." });
-    }
-
-    const insert = 'INSERT INTO bookings (serviceType, date, time, duration) VALUES (?,?,?,?)';
-    db.run(insert, [serviceType, date, time, duration], function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.status(201).json({
-            message: 'Booking created successfully',
-            bookingId: this.lastID,
-            serviceType,
-            date,
-            time,
-            duration
-        });
-    });
-});
-
-// Create Stripe Checkout Session for booking
-app.post('/api/create-booking-checkout-session', async (req, res) => {
-    const { serviceType, date, time, duration } = req.body;
-
-    // For simplicity, using a fixed price for booking. In a real app, this would be dynamic.
-    const bookingPrice = 100.00 * duration; // $100 per hour
 
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            line_items: [
-                {
-                    price_data: {
-                        currency: 'usd',
-                        product_data: {
-                            name: `Booking: ${serviceType} on ${date} at ${time} for ${duration} hours`,
-                            description: `Service Type: ${serviceType}, Date: ${date}, Time: ${time}, Duration: ${duration} hours`,
-                        },
-                        unit_amount: Math.round(bookingPrice * 100), // Price in cents
-                    },
-                    quantity: 1,
-                },
-            ],
+            line_items,
             mode: 'payment',
-            success_url: `${req.protocol}://${req.get('host')}/frontend/index.html?bookingSuccess=true`,
-            cancel_url: `${req.protocol}://${req.get('host')}/frontend/index.html?bookingCanceled=true`,
+            success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL}/canceled`,
         });
         res.json({ id: session.id });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+    } catch (error) {
+        console.error('Error creating Stripe checkout session:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Google Calendar API setup
+// Google Calendar Integration
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_REDIRECT_URI
 );
 
-// If using a service account, load the key file
-if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH) {
-    const key = require(process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH);
-    oAuth2Client.fromJSON(key);
-    oAuth2Client.scopes = ['https://www.googleapis.com/auth/calendar'];
-} else {
-    // For OAuth2 flow, you would need to handle token acquisition and refresh
-    // For simplicity, this example assumes a pre-authorized token or service account
-    // In a real application, you'd implement a flow to get and store refresh tokens
-    console.warn("Google Service Account Key Path not provided. Ensure OAuth2 tokens are managed.");
-}
+// Set up a transporter for Nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or any other email service
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
 
-const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+app.get('/api/calendar/available-slots', async (req, res) => {
+    const { startDate, endDate, durationMinutes } = req.query;
 
-// Helper function to get busy times from Google Calendar
-async function getBusyTimes(calendarId, timeMin, timeMax) {
+    if (!startDate || !endDate || !durationMinutes) {
+        return res.status(400).json({ error: 'Missing required query parameters: startDate, endDate, durationMinutes' });
+    }
+
     try {
+        oAuth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
+        const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
         const response = await calendar.freebusy.query({
             auth: oAuth2Client,
             resource: {
-                items: [{ id: calendarId }],
-                timeMin: timeMin.toISOString(),
-                timeMax: timeMax.toISOString(),
+                items: [{ id: process.env.GOOGLE_CALENDAR_ID }],
+                timeMin: new Date(startDate).toISOString(),
+                timeMax: new Date(endDate).toISOString(),
             },
         });
-        return response.data.calendars[calendarId].busy;
-    } catch (error) {
-        console.error('Error fetching busy times from Google Calendar:', error.message);
-        throw new Error('Failed to fetch available slots.');
-    }
-}
 
-// New endpoint to get available booking slots
-app.get('/api/calendar/available-slots', async (req, res) => {
-    const { startDate, endDate, durationMinutes } = req.query;
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+        const busySlots = response.data.calendars[process.env.GOOGLE_CALENDAR_ID].busy || [];
+        const allDaySlots = generateDaySlots(startDate, endDate, parseInt(durationMinutes));
 
-    if (!startDate || !endDate || !durationMinutes || !calendarId) {
-        return res.status(400).json({ error: "startDate, endDate, durationMinutes, and GOOGLE_CALENDAR_ID are required." });
-    }
+        const availableSlots = allDaySlots.filter(slot => {
+            // Check if the slot overlaps with any busy slot
+            return !busySlots.some(busy => {
+                const busyStart = new Date(busy.start);
+                const busyEnd = new Date(busy.end);
+                const slotStart = new Date(slot.start);
+                const slotEnd = new Date(slot.end);
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const durationMs = parseInt(durationMinutes) * 60 * 1000; // duration in milliseconds
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || isNaN(durationMs)) {
-        return res.status(400).json({ error: "Invalid date or duration format." });
-    }
-
-    try {
-        const busyTimes = await getBusyTimes(calendarId, start, end);
-        const availableSlots = [];
-
-        // Define working hours (e.g., 9 AM to 5 PM) and buffer
-        const workingHoursStart = 9; // 9 AM
-        const workingHoursEnd = 17; // 5 PM
-        const bufferMinutes = 15; // 15 minutes buffer between appointments
-
-        let currentTime = new Date(start);
-        currentTime.setHours(workingHoursStart, 0, 0, 0); // Start checking from working hours
-
-        while (currentTime.getTime() + durationMs <= end.getTime()) {
-            const slotEnd = new Date(currentTime.getTime() + durationMs);
-
-            // Check if slot is within working hours
-            if (currentTime.getHours() >= workingHoursStart && slotEnd.getHours() <= workingHoursEnd) {
-                let isBusy = false;
-                for (const busy of busyTimes) {
-                    const busyStart = new Date(busy.start);
-                    const busyEnd = new Date(busy.end);
-
-                    // Check for overlap with busy times, including buffer
-                    if (
-                        (currentTime.getTime() < busyEnd.getTime() + (bufferMinutes * 60 * 1000)) &&
-                        (slotEnd.getTime() > busyStart.getTime() - (bufferMinutes * 60 * 1000))
-                    ) {
-                        isBusy = true;
-                        break;
-                    }
-                }
-
-                if (!isBusy) {
-                    availableSlots.push({
-                        start: currentTime.toISOString(),
-                        end: slotEnd.toISOString(),
-                    });
-                }
-            }
-
-            // Move to the next potential slot, considering duration and buffer
-            currentTime = new Date(currentTime.getTime() + (durationMinutes * 60 * 1000) + (bufferMinutes * 60 * 1000));
-            // If moving to next day, reset to working hours start
-            if (currentTime.getHours() > workingHoursEnd) {
-                currentTime.setDate(currentTime.getDate() + 1);
-                currentTime.setHours(workingHoursStart, 0, 0, 0);
-            }
-        }
-
-        res.json(availableSlots);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// New endpoint to create a booking in Google Calendar
-app.post('/api/bookings/google-calendar', async (req, res) => {
-    const { serviceType, date, time, duration, clientName, clientEmail } = req.body;
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
-
-    if (!serviceType || !date || !time || !duration || !clientName || !clientEmail || !calendarId) {
-        return res.status(400).json({ error: "All booking fields and GOOGLE_CALENDAR_ID are required." });
-    }
-
-    const startDateTime = new Date(`${date}T${time}:00`);
-    const endDateTime = new Date(startDateTime.getTime() + (duration * 60 * 60 * 1000)); // duration in hours
-
-    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-        return res.status(400).json({ error: "Invalid date or time format." });
-    }
-
-    const event = {
-        summary: `${serviceType} with ${clientName}`,
-        description: `Client Email: ${clientEmail}\nService: ${serviceType}\nDuration: ${duration} hours`,
-        start: {
-            dateTime: startDateTime.toISOString(),
-            timeZone: 'UTC', // Or dynamically get from client/server
-        },
-        end: {
-            dateTime: endDateTime.toISOString(),
-            timeZone: 'UTC', // Or dynamically get from client/server
-        },
-        attendees: [
-            { email: clientEmail },
-            // Add your own calendar email if you want to be an attendee
-            // { email: 'your-calendar-email@example.com' },
-        ],
-        reminders: {
-            useDefault: false,
-            overrides: [
-                { method: 'email', minutes: 24 * 60 },
-                { method: 'popup', minutes: 10 },
-            ],
-        },
-    };
-
-    try {
-        const response = await calendar.events.insert({
-            auth: oAuth2Client,
-            calendarId: calendarId,
-            resource: event,
-        });
-
-        const googleCalendarEventId = response.data.id;
-
-        // Store booking in local database
-        const insert = 'INSERT INTO bookings (serviceType, date, time, duration, googleCalendarEventId) VALUES (?,?,?,?,?)';
-        db.run(insert, [serviceType, date, time, duration, googleCalendarEventId], function(err) {
-            if (err) {
-                console.error("Error inserting booking into local DB:", err.message);
-                // Consider rolling back Google Calendar event if DB insert fails
-                return res.status(500).json({ error: "Booking created in Google Calendar, but failed to save locally." });
-            }
-            res.status(201).json({
-                message: 'Booking created successfully',
-                bookingId: this.lastID,
-                googleCalendarEventId: googleCalendarEventId,
-                serviceType,
-                date,
-                time,
-                duration
+                return (slotStart < busyEnd && slotEnd > busyStart);
             });
         });
 
-    } catch (e) {
-        console.error('Error creating Google Calendar event:', e.message);
-        res.status(500).json({ error: e.message });
+        res.json(availableSlots);
+
+    } catch (error) {
+        console.error('Error fetching available slots:', error);
+        res.status(500).json({ error: 'Failed to fetch available slots.' });
     }
 });
 
-app.post('/api/contact', async (req, res) => {
-    const { name, email, message } = req.body;
+function generateDaySlots(startDate, endDate, durationMinutes) {
+    const slots = [];
+    const startOfDay = new Date(startDate);
+    startOfDay.setHours(9, 0, 0, 0); // Start at 9 AM
+    const endOfDay = new Date(startDate);
+    endOfDay.setHours(17, 0, 0, 0); // End at 5 PM
 
-    if (!name || !email || !message) {
-        return res.status(400).json({ error: "Name, email, and message are required." });
+    let currentTime = startOfDay;
+    while (currentTime.getTime() + durationMinutes * 60 * 1000 <= endOfDay.getTime()) {
+        const slotStart = new Date(currentTime);
+        const slotEnd = new Date(currentTime.getTime() + durationMinutes * 60 * 1000);
+        slots.push({ start: slotStart.toISOString(), end: slotEnd.toISOString() });
+        currentTime = new Date(currentTime.getTime() + durationMinutes * 60 * 1000);
     }
+    return slots;
+}
 
-    // Create a Nodemailer transporter using SMTP
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
 
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: 'novtec.x.ab@gmail.com', // The target email address
-        subject: `New Contact Form Submission from ${name}`,
-        html: `
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Message:</strong> ${message}</p>
-        `,
-    };
+app.post('/api/bookings/google-calendar', async (req, res) => {
+    const { serviceType, date, time, duration, clientName, clientEmail } = req.body;
 
     try {
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Email sent successfully!' });
+        oAuth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
+        const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+        const startDateTime = new Date(`${date}T${time}:00`);
+        const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 60 * 1000); // duration in hours
+
+        const event = {
+            summary: `${serviceType} Session with ${clientName}`,
+            description: `Client Email: ${clientEmail}\nService: ${serviceType}\nDuration: ${duration} hours`,
+            start: {
+                dateTime: startDateTime.toISOString(),
+                timeZone: 'UTC', // Assuming UTC for simplicity, adjust as needed
+            },
+            end: {
+                dateTime: endDateTime.toISOString(),
+                timeZone: 'UTC',
+            },
+            attendees: [
+                { email: clientEmail },
+                { email: process.env.GOOGLE_CALENDAR_ID }, // The photographer's calendar
+            ],
+            reminders: {
+                useDefault: false,
+                overrides: [
+                    { method: 'email', minutes: 24 * 60 },
+                    { method: 'popup', minutes: 10 },
+                ],
+            },
+        };
+
+        const response = await calendar.events.insert({
+            calendarId: process.env.GOOGLE_CALENDAR_ID,
+            resource: event,
+        });
+
+        // Send confirmation email to client
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: clientEmail,
+            subject: `Booking Confirmation: ${serviceType} Session`,
+            html: `<p>Dear ${clientName},</p>
+                   <p>Your ${serviceType} session has been confirmed for ${date} at ${time} UTC.</p>
+                   <p>We look forward to seeing you!</p>
+                   <p>Stureby Photography Team</p>`,
+        });
+
+        res.status(200).json({ message: 'Booking successful!', event: response.data });
+
     } catch (error) {
-        console.error('Error sending email:', error);
-        res.status(500).json({ error: 'Failed to send email.' });
+        console.error('Error creating Google Calendar event or sending email:', error);
+        res.status(500).json({ error: 'Failed to create booking.' });
     }
 });
 
+// Associate Application Endpoint
 app.post('/api/apply', async (req, res) => {
     const { name, email, phone, portfolio, experience, gear, message } = req.body;
 
-    if (!name || !email || !experience || !message) {
-        return res.status(400).json({ error: "Name, email, years of experience, and message are required." });
-    }
-
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: process.env.EMAIL_SECURE === 'true',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: 'novtec.x.ab@gmail.com', // Target email for applications
-        subject: `New Second Associate Application from ${name}`,
-        html: `
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
-            <p><strong>Portfolio/Website:</strong> ${portfolio || 'N/A'}</p>
-            <p><strong>Years of Experience:</strong> ${experience}</p>
-            <p><strong>Photography Gear:</strong> ${gear || 'N/A'}</p>
-            <p><strong>Message:</strong> ${message}</p>
-        `,
-    };
-
     try {
-        await transporter.sendMail(mailOptions);
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: 'novtec.x.ab@gmail.com', // Associate application recipient
+            subject: `New Photography Associate Application from ${name}`,
+            html: `<p>Name: ${name}</p>
+                   <p>Email: ${email}</p>
+                   <p>Phone: ${phone || 'N/A'}</p>
+                   <p>Portfolio: ${portfolio || 'N/A'}</p>
+                   <p>Experience: ${experience || 'N/A'} years</p>
+                   <p>Gear: ${gear || 'N/A'}</p>
+                   <p>Message: ${message || 'N/A'}</p>`,
+        });
+
         res.status(200).json({ message: 'Application submitted successfully!' });
     } catch (error) {
-        console.error('Error sending application email:', error);
-        res.status(500).json({ error: 'Failed to send application email.' });
+        console.error('Error sending associate application email:', error);
+        res.status(500).json({ error: 'Failed to submit application.' });
     }
 });
 
+// Contact Form Endpoint
+app.post('/api/contact', async (req, res) => {
+    const { name, email, message } = req.body;
+
+    try {
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: 'novtec.x.ab@gmail.com', // Contact form recipient
+            subject: `New Contact Form Submission from ${name}`,
+            html: `<p>Name: ${name}</p>
+                   <p>Email: ${email}</p>
+                   <p>Message: ${message}</p>`,
+        });
+
+        res.status(200).json({ message: 'Message sent successfully!' });
+    } catch (error) {
+        console.error('Error sending contact form email:', error);
+        res.status(500).json({ error: 'Failed to send message.' });
+    }
+});
+
+
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
