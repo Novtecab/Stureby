@@ -17,6 +17,9 @@ const photos = [
     { id: 'photo1', src: '/assets/placeholder_image1.png', alt: 'Landscape Photo 1', title: 'Mountain View', category: 'landscape', price: 25.00 },
     { id: 'photo2', src: '/assets/placeholder_image2.png', alt: 'Portrait Photo 1', title: 'Smiling Face', category: 'portrait', price: 35.00 },
     { id: 'photo3', src: '/assets/placeholder_image1.png', alt: 'Wildlife Photo 1', title: 'Eagle in Flight', category: 'wildlife', price: 45.00 },
+    { id: 'photo4', src: 'https://cdn-st3.vigbo.com/u38921/51521/blog/4059620/2762054/74051352/2000-1236b6523a4b828f2e534dd9765101a2.jpg', alt: 'Stureby Creative Agency 2025', title: 'Stureby Creative Agency 2025', category: 'Art', price: 20.00 },
+    { id: 'photo5', src: 'https://cdn-st3.vigbo.com/u38921/51521/blog/4059617/7796314/preview/2000-crop--f1ae7ce6e5c9ebc3ac9c75a53520ca3b.jpg?v=2', alt: 'Stureby Creative Agency 2025', title: 'Stureby Creative Agency 2025', category: 'Art', price: 20.00 },
+    { id: 'photo6', src: 'https://cdn-st3.vigbo.com/u38921/51521/blog/4059617/7717710/preview/2000-crop--c1cf873659c0d26c4a089048bbea00dc.jpg?v=1', alt: 'Stureby Creative Agency 2025', title: 'Stureby Creative Agency 2025', category: 'Art', price: 20.00 },
 ];
 
 const magazine = {
